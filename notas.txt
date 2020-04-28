@@ -1,0 +1,3330 @@
+---------/* Instalación de dependencias de nodejs*/---------
+
+//Para iniciar un proyecto node debemos ejecutar el comando npm init
+
+//Se instala express framework para poder trabajar con rutas, peticiones http
+// npm install express --save 
+
+//Se instala bcrypt para cifrar contraseñas de manera segura
+//npm install bcrypt-nodejs --save
+
+//Se installa body-parser para transformar objetos string o json a objetos js
+//npm install body-parser --save
+
+//Se instala connect-multiparty para hacer subidas de ficheros
+// npm install connect-mutiparty --save
+
+//Se instala mongoose para trabajar con mongodb
+// npm install mongoose --save
+
+//Se instala jwt-simple para trabajar con tokens y su gestion
+// npm install --save jwt-simple
+
+//Se instala moment para trabajar con fechas y timestramp
+// npm install moment --save
+
+//Se instala nodemon para que el servidor se reinicie automaticamente al detectar cambios dell código (se debe activar solo es desarrollo y no producción)
+// npm install nodemon --save-dev
+
+
+---------/* Desarrollo */---------
+
+//se crea una carpeta d enombre api que es donde guardaremos nuestro proyecto y será utilizada como ruta princial
+
+//Se crea el archivo index.js archivo principal donde pasaran todas las peticiones
+
+// Aqui se creara la conexion a bd y creación de servidor
+
+//Se empieza con una instrucción 'use strict' para usar nuevas características de js
+
+//Cargar mongoose en una variable para trabajar con mongo tal como var mongoose = require('mongoose');
+
+//Para trabajar con mongoose se debe trabajar con promesas, es decir mongoose.Promise = global.Promise;
+
+//Luego se realiza la conexion y se le pasa un parametro para que se conecte como clioente mongoose.connect('mongodb://localhost:27017/curso_mean_social', { useMongoClient: true }).then(() => {
+    console.log("La conexion se ha realizado con exito");
+}).catch (err => console.log(err));
+
+
+//Para ejecutar el fichero usamos por consola el comando node index.js
+
+//Para que los cambios en el servidor se ejecuten de manera dinàmica y no cortar la ejecución, en el package.json debemos escribir el siguiente script "start": "nodemon index.js"
+
+//Ahora la ejecución del archivo debe ser mediante el comando en consola npm start 
+
+//En esta version de node sugiere quitar el parametro para usar mongo como cliente, en caso de error tenerlo en cuenta { useMongoClient: true }
+
+---------/*Creando el servidor con express*/---------
+
+//En la carpeta api creamos un archivo app.js
+
+//Ponemos 'use strict'
+
+//Creamos una variable de tipo express para poder trabajar con rutas y protocolo http "var express = require('express');"
+
+//Creamos una variable bodyParser para transformar los objetos obtenidos con POST en objetos js "var bodyParser = require('body-parser');"
+
+//Cramos una variable app como instancia del framework express "var app = express();"
+
+//Se secciona el documento en cargar rutas, middlewares, cors, rutas, exportar, etc.
+
+//Codificamos los middleware tales como "app.use(bodyParser.urlencoded({extended:false}));" y "app.use(bodyParser.json());" los cuales sirven para transformar objetos a tipo json en cada petición realizada al backend
+
+//Se exporta la configuración "module.exports = app;"
+
+//Cargar el archivo app.js en el index.js "var app = require('./app');"
+
+//Creamos una variable port para indicar el puerto que utilizaremos (se realiza tambien en index.js) "var port = 3800;"
+
+//Codificamos la creación del servidor dentro de la conexion a la base de datos en la función then "app.listen( port, () => {
+    console.log("Servidor corriendo");
+});"
+
+//Como prueba creamos una ruta en el servidor "app.get('/pruebas', (req, res) => {
+    res.status(200).send({
+        message: 'Acción de pruebas server NodeJS'
+    });
+});"
+
+//Como recomendacion instalar en google chrome json view para la vista de archivos json (opcional) y también se recomienda la instalacion de un cliente restful como exetension de chrome llamado "postman" trambièn se puede instalar de forma nativa
+
+---------/*Creando el api del backend*/---------
+
+//El primer paso es crear los modelos de entidades, se crea la carpeta models dentro de api y luego se crea un archivo por cada modelo, en nuestro caso user.js 
+
+//Como se maneja mongo a través de mongoose se crean los modelos siguiendo el patro del framework, se empieza poniendo 'use strict' y se carga el modulo de mongoose "var mongoose = require('mongoose');", creamos una variable para definir los schemas "var Schema = mongoose.Schema;"
+
+//Luego se crea el esquema modelo que manejará la entidad, la definimos como "var UserSchema = Schema({
+    name: String,
+    surname: String,
+    nick: String,
+    email: String,
+    password: String,
+    role: String,
+    image: String
+});" a esta variable se le pasa un json con los parametros dados en la bd menos el id que mongo genera por defecto. Con este modelo se podrán crear objetos en base a esta entidad
+
+//Para poder utilizar el modelo se debe exportar "module.exports = mongoose.model('User', UserSchema);" se llama al objeto mongoose para exportar el modelo pasando como parametro el nombre del modelo y el schema utilizado
+
+//De la misma forma se procede a crear los otros modelos
+
+//En lo modelos que usan campos rferenciados de otra tabla, esos campos se declaran de la siguiente manera "user: {type: Schema.ObjectId, ref:'User'}" teniendo en cuenta que el parametro en este caso 'user' estara definido como un objeto de tipo Id que hacer referencia al scheman 'User'
+
+/*Modelo Vista Controlador*/
+
+//Todo el diseño y logica de programación estará basado en la arquitectura MVC
+
+---------/*Usuarios login y registros*/---------
+
+//En api se crea una carpeta controllers donde se pondrán los archivos correspondientes a los controladores mencionados en este apartado como 'user.js'
+
+//Se empieza declarando 'use strict' y se va a necesitar el modelo del usuario, se declara "var User = require('../models/user')" se llama desde la carpeta models al modelo ya Creado 
+
+
+//En esta sección se pueden utilizar los metodos ya creados en los modelos, pero deben ser declarados solo función, de la siguiente manera: "function home(req, res){
+    res.status(200).send({
+        message: 'Hola desde el servidor NodeJs'
+    });
+}"
+
+//Los metodos establecidos en el controlador deben ser exportados como un objeto json, de la siguiente manera: "module.exports = {
+    home
+}"
+
+//Para poder hacer uso de estos métodos se deben establecer ficheros de rutas, estas rutas iran dentro de una carpeta ubicada en api llamada routes y se crean los archivos puede ser siguiendo el mismo formato "user.js"
+
+//El archivo de rutas se define con "'use strict'", en este archivo se hará uso de la librería express de node, por tanto debe ser declarada como "var express = requires('express');"
+
+//Se debe cargar tambien el archivo de controlador "var UserController = require('../controller/user');"
+
+//Se crea una variable para cargar el metodo router de expres "var api = express.Router();"
+
+//Para hacer la llamada a los metods hacemos uso del objeto express api tal que: "api.get('/home', UserController.home);"
+
+//Luego se exporta también el objeto en cuestión "module.exports = api;"
+
+//Para que esto funcione debe ser cargado en el app.js (puede hacerse en el apartado de cargar rutas) creando una variable tal que: "var user_routes = require('./routes/user');"
+
+//Luego en la sección rutas definimos un use como middleware de la siguiente manera: "app.use('/api', user_routes);" esto sirve para sobreescribir la url y que vaya el '/api' antes de cualquier otra ruta cargada por user_routes 
+
+
+---------/*Registros de usuarios en el backend*/---------
+
+//En el controlador de usuario creamos un metodo nuevo tal que:" function saveUser(req, res){
+    var params = req.body;
+    var user = new User();
+
+    if(params.name && params.surname && params.nick && params.email && params.password){
+        user.name = params.name;
+        user.surname = params.surname;
+        ...
+        user.role = 'ROLE_USER';
+        user.image = null
+    } else{
+        res.status(200).send({
+            message: 'Envía todos los campos'
+        });
+    }
+}" se declara una variable params que va a recoger todos los datos obtenidos por metodo POST, se declara también una instancia de nuevo usuario, se crea la condicion de si se reciben los datos, se setean los datos en el modelo del usuario (la contraseña no se pone porque se guardará de manera cifrada), la imagen se la declara por defecto como null
+
+//se dclara la variable bcrypt "var bcrypt = require('bcrypt-nodejs');"
+
+//En el if en la parte de setear parametros ponemos "bcrypt.hash(params.password, null, null, (err, hash) => {
+    user.password = hash;
+
+    user.save((err, userStored) => {
+        if(err) return res.status(500).send({message: 'Error guardando usuario'});
+
+        if(userStored){
+            res.status(200).send({user: userStored});
+        } else{
+            res.status(404).send({message: 'No se ha registrado el usuario'});
+        }
+    });
+});" el hash es el metodo de encriptacion, los parametros null sirven para hacer modificaciones al metodo de enciptado como fortificar el metodo, luego se setea el hash en el campo password y se realiza un save con mongoose, dentro del callback, si el error da true, se envía el mensaje, si no entra en la condición, se verifica si hay un usuario almacenado y si esto es true se devuelve el usuario, en caso contrario devuelve como error que no se registra el usuario
+
+//Se debe agrgar la función al modulo de exportación
+
+//En rutas del usuario agregamos la ruta para el metodo a usar "api.post('/register', UserController.saveUser);"
+
+
+------/*Control de usuarios duplicados*/------
+
+//Antes del bcrypt pones "User.find({ $or: [
+    {email: user.email.toLowerCase()},
+    {nick: user.nick.toLowerCase()}
+]}).exec((err, users) => {
+    if(err) return res.status(500).send({message: 'Error en la petición de usuarios'});
+
+    if(users && users.length >= 1){
+        return res.status(200).send({message: 'El usuario ya existe'});
+    } else {
+        //Codigo de bcrypt
+    }
+});" con la función find de mongoose utilizando un or, se busca si ya existe algún registro con esos datos, una vez ejecutada se recibe un erros o una respuesta de usuario, si hay error se pinta mensaje 500, si existe el usuario se pinta el mensaje 200, si todo esta bien se salta a cifrar la contraseña, el codigo del bcrypt debe estar dentro del ultimo else 
+
+---------/*Método de Login*/---------
+
+//Para crear el metodo de login en el controlador de user creamos una función de la siguiente manera: "function loginUser(req, res){
+    var params = req.body;
+    var email = params.email;
+    var password = params.passwors;
+
+    User.findOne({email: email}, (err, user) => {
+        if(err) return res.status(500).send({message: 'Error en la petición'});
+
+        if(user){
+            bcrypt.compare(password, user.password, (err, check) => {
+                if(check){
+                    //devolvemos datos de usuario
+                    user.password = undefined;
+                    return res.status(200).sen({user});
+                } else{
+                    return res.status(404).send({message: 'El usuario no se ha posisdo identificar'});
+                }
+            })
+        } else{
+            return res.status(404).send({message: 'El usuario no se ha posisdo identificar!!'});
+        }
+    });
+}" En este metodo se reciben dos parametros, respuesta y requerimiento, lo primero que hacemos es declarar una variable params que contendrá los parametros obtenidos de la requsición hecha al POST que nos devolverá un body, luego declaramos la variable email y password sacadas de params para hacer comparaciones. Para realizar una comparación llamaos al modelo User y utilizamos la función de mongoose findOne pasandole las credenciales de usuario y una función de callback, dentro de la función preguntamos se hay un error, si no hay error, nos devuelve un objeto usuario, el cual haremos una comparación de credenciales con el metodo compare de bcrypt, si esto es correcto devolvemos los datos del usuario (esto cambiará más adelante), caso contrario se ,amdará un mensaje de error, en caso de que no devuelva un usuario o un error, el if principal nos mandará al else que da como respuesta un error de identificación, en el check ponemos el password como indefined para no mostrar el dato al devolver el objeto usuario
+
+//Una vez credo el metodo se debe añadir al modulo de exportaciones
+
+//Luego en las rutas se debe crear una ruta de tipo post para el metodo
+
+
+---------/*Servicio y tokens en JWT (json web tokens)*/---------
+
+//En en el controlador de usuario en la parte del check verificamos si llega un parametro por POST que será un token, es decir: "if(params.gettoken){
+        //devolver token
+    //generar el token
+
+} else{
+    //devolver datos de usuario
+    user.password = undefined;
+    return res.status(200).send({user});
+}"
+
+//Para generar el token debemos generar un servicio, así que dentro de api generamos la carpeta services y dentro el archivo jwt.js el cual empezamos con un 'use strict'
+
+//Creamos una variable jwt para cargar la libreria tal que: "var jwt = require('jwt-simple')"
+
+//generamos una variable moment para trabajar con fechas: "var moment = require('moment')"
+
+//Generamos una variable secret que va a contener una clave secreta "var secret = 'clave_secreta_curso_desarrolla_red_social_angular';" esta clave solo la sabra el programador
+
+//Como solo tendremos un solo metodo en este archivo lo cargamos directo al modulo de export así: "export.createToken = function(user){
+    var payload = {
+        sub: user._id,
+        name : user.name,
+        surname: user.surname,
+        nick: user.nick,
+        email: user.email,
+        role: user.role,
+        image: user.image,
+        iat: moment().unix,
+        exp: moment().add(30, 'days').unix
+    };
+
+
+}" Nuestra funcion recibe un parametro que es un objeto de tipo usuario, dentro creamos una variable payload la cual va a contener un objeto con los datos del usuario a codificar, sub en jwt hace referencia al id, iat a la fecha de creación 
+
+//Para generar el token luego de generada la variable retornamos "return jwt.encode(payload, secret)" y esto nos genera un hash 
+
+//En el controlador de usuario importamos el servicio jwt "var jwt = require('../services/jwt')"
+
+//En el if para obtener token retornamos "return res.status(200).send({
+    token: jwt.createToken(user)
+});"
+
+---------/*Middleware de autenticación*/---------
+
+//Este middleware comprobará el token que se le envía en cada petición realizada a la api 
+
+//Crmos una carpeta en api llamada middlewares y dentro cramos un archivo authenticated.js
+
+//El archivo empieza con 'use strict', cargamos las variables correspondientes para jwt-simple, moment y también la creación de la misma clave secreta
+
+//Creamos un metodo directamente exportado, esta función recibirá 3 parámetros, un request que obtendremos de la petición, responde que será la respuesta que daremos y un next para que la petición salga del middleware y ejecute la función siguiente
+
+//Dentro haremos una comprobación para revisar si nos llega la cabecera de comprobación, si la variable llega, esta se almacena de una variable que puede ser llamada token, aquí se le debe reemplazar cualquier comilla doble o simple dentro del string por nada
+
+//Se crea una variable payload donde almacenaremos en token decodificado, este payload es sensible a tirar error dentro de la aplicación, por lo que se recomienda meterlo dentro de un try catch 
+
+//Dentro del try se comprueba si el apyload contiene una fecha de expiración menor o igual a la fecha actual, de ser así, se indica que ha expirado
+
+//i la aplicación entra al catch se debe responder con un mensaje de que el token no es vàlido
+
+//Luego se adjunta el payload al request del usuario para tener siempre dentro el objeto de  los controladores el usuario loggeado, el payload contiene los datos descifrado del objeto usuario y una vez autenticado se guarda en la propiedad user del request para poder acceder a esos datos siempre que el usuario este loggeado
+
+//finalmente llamamos al metodo next y ejecutar la acción del controlador
+
+//El codigo del middleware quedaría de la siguiente manera: "'use strict'
+var jwt = require('jwt-simple');
+var momento = require('moment');
+var secret = 'clave_secreta_curso_desarrolla_red_social_angular';
+
+exports.ensureAuth = function(req, res, next){
+    if(!req.headers.authorization){
+        return res.status(403).send({message: 'La petición no tiene la cabecera de autenticación'});
+    }
+
+    var token = req.headers.authorization.replace(/['"]+/g, '');
+
+    try{
+        var payload = jwt.decode(token, secret);
+
+        if(payload.exp <= moment().unix()){
+            return res.status(401).send({
+                message: 'El token ha expirado'
+            });
+        }
+    } catch(ex){
+        return res.status(404).send({
+            message: 'El token no es vàlido'
+        });
+    }
+
+    req.user = payload;
+
+    next();
+
+}"
+
+//Luego en nuestro archivo de rutas cargamos el archivo del middleware a través de una variable "var md_auth = require('../middlewares/authenticated')"
+
+//Para poder hacer uso del metodo, debemos agrgar la variable creada a la ruta por la cual queremos que pase por autenticación, debiendo quedar de la siguiente manera: "api.get('/pruevas', md_auth.ensureAuth, UserController.pruebas);"
+
+//Para probar en el postman, debemos ir a la parte de headers y pasarle el parametro que solicita, en este caso es authorization y le pasamos un token valido
+
+---------/*Ruta para devolver los datos del usuario*/---------
+
+//En el controlador de usuario crearemos un metodo que nos devuelva los datos de un usuario en concreto, este metodo tendra como parametros un request y un response, a este metodo le crearemos un variable userId que recoge los datos que nos llega por la url (cuando nos llegan datos por la url(GET) utilizamos params, cuando llegan datos por POST o PUT, utilizamos body)
+
+//Luego hacemos uso del modelo y hacemos una busqueda con FindById, a esta función se le pasa como parametro la variable userId y una función callback que tendrá como parametro un error y un objeto user, si temos un error devolvemos un mensaje de error, luego comprobamos is el usuario no nos llega, devolvemos un mensaje de que el user no existe, en caso de no entrar en ningún if, devolvemos los datos del usuario
+
+//El codigo del metodo quedaría de la siguiente forma: " function getUser(req, res){
+    var userId = req.params.id;
+
+    User.findById(userId, (err, user) => {
+        if(err) return res.status(500).send({message: 'Error en la petición'});
+
+        if(!user) return res.status(404).send({message: 'El usuario no existe'});
+
+        return res.status(200).send({user});
+    });
+}"
+
+//Agregamos el metodo al module exports
+
+//En el archivo de rutas, creamos la nueva ruta por get y usando la autenticacion de usuario, la ruta se debe configurar pasando un id como parametro es decir"'/user/:id'"
+
+//Para probar con postman debemos copiar el id de algun usuario en la bd de mongo y pegarlo en la ruta para que nos devuelva los datos (este metodo al declarar en la ruta que pasara por autenticación del middleware, necesita que se le pase en la cabecera un token valido)
+
+---------/*Usuario paginados*/---------
+
+//Lo primero que debemos hacer es instalar mongoose pagination "npm install --save mongoose-pagination"
+
+//Agregamos una variable que cargue al modulo mongoose pagination: "var mongoosePagination = require('mongoose-pagination');"
+
+//Crearemos un metodo que devuelva un listado de usuarios paginados, la funcion getUser, recibirá como parametros un request y un response, recibirá por url una página o número de paginas para paginar el listado de usuarios en la plataforma
+
+//se crea una variable que recoga el id del usuario loggeado en el momento, accedemos a esta información a trves del token que ya se encuentra cargado en el req.user y accedemos al id a trvés de .sub 
+
+//Creamos una variable page que será por defecto igual a uno
+
+//Comprobar que nos llega a través de la url la pagina y de ser así modificamos el valor de la variable con el que valor que nos llega
+
+//Definimos una variable itemsPerPagina, es decir el número de items que visualizaremos por pagina, se le asigna un valor por defecto
+
+//Llamamos a al controlador User y buscamos los items, ordenamos por id y llamamos al metodo de paginación
+
+//El metodo de paginacion tendrá como parametro la pagina que recibe, la variable de items por pagina y una función de callback
+
+//La función de callback recibe como parametros, un error, usuarios y total, usuarios será el listado de usuarios y total será un count de cuantos usuarios hay
+
+//Dentro del callback, en caso de error, mandamos como return un mensaje
+
+//Si no existe usuario, retornamos que no existen usuarios
+
+//En caso de no tener fallos, hacemos un return con la lista de usuario, el total de usuarios y el número de paginas, para esto ultimo colocamos la propiedad pagina y lo dividimos de la siguiente manera "Math.ceil(total/itemsPerPage)"
+
+//El codigo de la función quedaría de la siguente manera: "function getusers(req, res){
+    
+    var identity_user_id = req.user.sub;
+    var page = 1;
+
+    if(req.params.page){
+        page = req.params.page;
+    }
+
+    var itemsPerPage = 5;
+
+    User.find().sort('_id').paginate(page, itemsPerPage, (err, users, total) => {
+        if(err) return res.status(500).send({ message: 'Error en la petición'});
+
+        if(!users) return res.status(404).send({message: 'No hay usuarios disponibles'});
+
+        return res.status(200).send({
+            users,
+            total,
+            pages: Math.ceil(total/itemsPerPage)
+        });
+    });
+}"
+
+//Agregamos el metodo al modulo de exportación
+
+//Creamos la ruta por get con un parametro opcion que será el numero de paginas es decir "/users/:page?"
+
+---------/*Actualizar los datos del usuario*/---------
+
+//Creación de un método que permita actualizar los datos de un usuario
+
+//En el controlador creamos un metod de actualizacion, este metodo tendrá de parametros un req y res, dentro creamos una variable que recoga por url el id
+
+//También creamo una variable update que recoga los datos que vamos a modificar en el usuario, para ello utilizamos la propiedad body del req
+
+//Se debe quitar la propiedad password de la variable update (esta actualización debe realizarse por separado)
+
+//Borramos la propiedad tal que "delete update.password"
+
+//Comprobamos si el user id recibido por url es diferente al que se tiene en el request, si esta condicion se cumple retornamos un mensaje de no permisión para modificar
+
+//Si el userId es el mismo que el del request, llamamos al modelo y usamos el metodo findByIdAndUpdate, a este metodo le pasamos el userId, el objeto update, un parametro de opciones (dentro de este parametro pasamos un json tal que {new: true} ya que mongoose por defecto nos devuelve en userUpdated el objeto usuario original, al mandar la opcion new, este nos devuelve el usuario con los nuevos datos)y una funcion callback que tendrá un posible error y un userUpdated
+
+//Si existe un error se devuelve mensaje de petición
+
+//Si no tenemos un userUIpdated, mandamos un mensaje de que no se pudo actualizar usuario
+
+//Si todo va bien, se hace un return con el usuario actualizado
+
+//Exportamos el metodo
+
+//El codigo del metodo quedaría de la siguiente manera: "function updateUser(req, res){
+    var userId = req.params.id;
+    var update = req.body;
+
+    delete update.password;
+
+    if(userId != req.user.sub){
+        return res.status(500).send({message: 'No tienes permiso para actualizar datos del usuario'});
+    }
+    
+    User.findByIdAndUpdate(userId, update, {new: true}, (err, userUpdated) => {
+        if(err) return res.status(500).send({message: 'Error en la petición'});
+
+        if(!userUpdated) return res.status(404).send({'No se ha podido actualizar el usuario'});
+
+        return res.status(200).send({user: userUpdated})
+    });
+
+}"
+
+//Creamos una nueva ruta con metodo PUT, la ruta debe recibir como parametro un id y pasar por una autenticacion
+
+//Par probar en el postman, debemos pasar en la url el id del usuario, en la cabecera se debe pasar la authorization con el token de ESE USUARIO y en el body los campos a modificar
+
+
+---------/*Subir avatar de usuario*/---------
+
+//Creamos un metodo para subir archivo de imagen de usuario
+
+//Importamos la libreria fs tal que: "var fs = require('fs');"
+
+//Importamos la libreria path tal que: "var path = require('path');"
+
+//En el controlador creamos una funcion uploadImage con parametros req y res
+
+//Declaramos una variable userId 
+
+//Dentro de la req hay una propiedad llamada files que tiene un array de los archivo que intentaremos subir
+
+//Si esto es cierto, entonces, creamos una variable file_path y esto va a ser igual al req.files.image.path, es decir, le pasamos la ubicacion de imagen a la propiedad file del req, también hacemos un else donde retornaremos un mensaje que indique que no se subieron archivos
+
+//Declaramos la varible file_spli donde cortaremos el nombre del archivo que será igual a "file_path.split('\\')" (la primer barra indica que se separará por un caracter especial, la segunda indica el caracter por el cual se separa)
+
+//Declaramos una variable que va a contener solo el nombre del archivo y no toda la ruta, decimos: "var file_name = file_split[2];"
+
+//Declaramos una variable para separar la extension del archivo tal que: "var ext_split = finale_name.split('\.')"
+
+//Luego creamos una variable donde vamos a almacenar solo la extension del archivo: "var file_ext = ext_split[1];"
+
+//Comprobamos que el userId sea el mismo que el cargado en el req
+
+//Comprobamos que si la extension del archivo es igual a png o jpg o jpeg o gif, entonces hacemos la actualizacion del documento del usuario, llamando al modelo User y usando el metodo findByIdAndUpdate a la cual le pasamos como parametros el userId, un json tal que "{image: file:name}", se le pasa el json para que nos devuelva el objeto actualizado y el callback con un posible error y un objeto userUpdated
+
+//En caso de que la extension de archivo no sea correcta, por el else eliminamos el archivo tal que: "fs.unlink(file_path, (err) => {})" y mandamos un mensaje de extension no valida en el callback, esta funcion de borrado la podemos crear como metodo privado, para eliminar el archivo también en caso de que los id no concuerden al principio del metodo o en esta misma parte, esta funcion no se necesita exportar ya que solo se utilizara dentro del metodo de carga de imagen
+
+//La funcion para remover archivos quedaria de la siguiente forma: "function removeFilesOfUploads(res, file_path, message){
+    fs.unlink(file_path, (err) => {
+        return res.status(200).send({message:message});
+    });
+}" se tiene en cuenta que se pasa parametro res, file_path y message  - (se recomienda poner un return antes de llamar a esta funcion para cortar procesos y evitar que siga corriendo el metodo principal)
+
+//El metodo uploadImage quedaría de la siguiente forma: "function uploadImage(req, res){
+    var userId = req.params.id;
+
+    if(req.files){
+        var file_path = req.files.image.path;
+        var file_split = file_path.split('\\');
+        var file_name = file_split[2];
+        var ext_split = file_name.split('\.');
+        var file_ext = ext_split[1];
+
+        if(userId != req.user.sub){
+            return removeFilesOfUploads(res, file_path, 'No tienes permiso para actualizar los datos del usuario');
+        }
+
+        if(file_ext == 'png' || file_ext == 'jpg' || file_ext == 'jpeg' || file_ext == 'gif' ){
+            User.findByIdAndUpdate(userId, {image: file_name}, {new: true}, (err, userUpdated) => {
+                if(err) return res.status(500).send({message: 'Error en la petición'});
+
+                if(!userUpdated) return res.status(404).send({message: 'No se ha podido actualizar los datos del usuario'});
+
+                return res.status(200).send({user: userUpdated});
+            });
+        } else{
+            return removeFilesOfUploads(res, file_path, 'Extensión no válida');
+        }
+    } else {
+        return res.status(200).send({message:'No se han subido imagenes'});
+    }
+}"
+
+//Exportamos el metodo uploadImage
+
+
+//Creamo una carpeta uploads en api y dentro de uploads, creamos una de nombre users
+
+//En el archivo rutas cargamos el componete multiparty tal que: "var multipart = require('connect-multiparty');"
+
+//Luego creamos una nueva ruta de middleware así: "md_upload = multipart({uploadDir: './uploads/users}');"
+
+//Creamos la ruta tal que: "api.post('/upload-image-user/:id', [md_auth.ensureAuth, md_upload], UserController.uploadImage);"
+
+//Para probar en postman debemos logearnos, pasar el id del usuario, poner el token en el header como authorization y en el body en form-data, cambiamos el tipo de archivo  y cargamos
+
+---------/*Devolver Imagenes de Usuario*/---------
+
+//Este metodo nos devolvera una url protegida que contendra la imagen
+
+//En el controlador creamos una funcione getImageFile con parametros req y res, dentro creamos una variable image_file que será igual al req.params.imageFile
+
+//Creamos una variable path_file que tendrá el path de las imagenes de usuario, es decir le pasamos "'./uploads/users' + image_file"
+
+//Luego comprobamos si el directorio existe con: "fs.exist()" a esa función le pasamos el path_file y una función de callback que tendrá un exist de true o false, si existe hacemos "res.sendFile(path.resolve(path_file))" (sendFile es un metodo propio de la respuesta de express) y en el else mandamos un mensaje de que no existe la imagen 
+
+//Exportamos el metodo
+
+//creamos una ruta por get "('/get-image-user/:imageFile', UserController.getImageFile);"
+
+//Para probar en el postman, se recomienda hacer el login y copiar el nombre de la imagen que se devuelve y pegarlo en la url de petición de prueba para comprobar
+
+---------/*Sistema de seguimiento de follows*/---------
+
+//Creamos en la carpeta controllers el fichero follows.js
+
+//Empezamos declarando 'use strict'
+
+//Declaramos las variables para utilizar las librerías path, fs, mongoose-pagination, de momento utilizaremos solo la de pagination
+
+//Declaramos una variable para llamar al modelo User y otra para el modelo Follow
+
+//Creamos un metodo de prueba "function prueba(req, res){
+    res.status(200).send({message: 'Hola desde controlador follows'});
+}"
+
+//Exportamos el modelo 
+
+//En la carpeta rutas, creamos un nuevo fichero follows.js
+
+//Declaramos instruccion 'use strict'
+
+//Declaramos la variable de la librería express: "var express = require('express')"
+
+//Declaramos la variable del controlador de Follow "var FollowController = require('../controllers/follow');"
+
+//Creamos una variable api para el express.Router()
+
+//Llamamos a traés de una variable al middleware de autenticación: "var md_auth = require('../middlewares/authenticated');"
+
+//Creamos la ruta por medio de get: "api.get('/pruebas', md_auth.ensureAuth, FollowController.prueba);"
+
+//Exportamos las rutas: "module.exports = api;"
+
+//Cargamos la nueva configuracion de turas en el app.js: "var follow_routes = require('./routes/follow');"
+
+//Agregamos el middleware para que todas las rutas de follow pasen también con ruta api: "app.use('/api', follow_routes);"
+
+---------/*Seguir a un usuario*/---------
+
+//Podemos editar el  metodo de pruba y lo ponemos como saveFollow
+
+//declaramos una variable params para recoger los parametros que lleguen por la petición post al body 
+
+//Declaramos otra variable follow para llamar al modelo de la bd;
+
+//Seteamos el valor a cada propiedad del objeto follow tal que: "follow.user = req.user.sub;
+follow.followed = params.followed;"
+
+//Guardamos el objeto en la bd: "follow.save((err, followStored) => {
+    if(err) return res.status(500).send({message:'Error al guardar'});
+
+    if(!followStores) return res.status(404).send({message: 'El seguimiento no se guardó'});
+
+    return res.status(200).send({follow: followStored});
+});"
+
+//Exportamos el metodo
+
+//Creamos la ruta cambiando la tura de prueba, esta se llamará follow y se irá por POST
+
+//Para probar en el postman, debemos pasar un token de usuario y en el body en el form urlencoded pasamos un parametro followed que contendrá el id del usuario a Seguir
+
+
+---------/*Dejar de seguir usuario*/---------
+
+//Creamos un metodo deleteFollow con parametros req y res
+
+//Debemos crear variables para recoger los id del usuario loggeado y del usuario al que queremos dejar de seguir, el id del usuario loggeado lo obtenemos por req.user.sub y el del otro lo obtenemos por url, es decir req.params.id
+
+//Hacemos uso del modelo y utilizamos el metodo find para que busque el registro que tenga el userId y followId que se tienen guardados y luego utilizamos el metodo remove que tendrá un posible error de callback, en caso contrario se devuelve un mensaje de follow eliminado
+
+//El codigo del metodo quedaría de la siguiente forma: "function deleteFollow(req, res){
+    var userId = req.user.sub;
+    var followId = req.params.id;
+
+    Follow.find({'user': userId, 'followed': followId}).remove(err => {
+        if(err) return res.status(500).send({message: 'Error al dejar de seguir'});
+
+        return res.status(200).send({message: 'El follow se hga eliminado'});
+    });
+}"
+
+//exportamos el metodo
+
+
+//Creamos la ruta por medio del metodo http delete tal que "api.delete('/follow/:id', md_auth.ensureAuth, FollowController.deleteFollow)"
+
+---------/*Listado de usuarios que sigo*/---------
+
+//En el controlador creramos un nuevo ¡metodo getFollowingUsers que tendrá un req y res
+
+//Dentro creamos una variable que recoga la variable del usuario loggeado: "var userID = req.user.sub;"
+
+//Debemos comprobar si se da el caso de que nos llegue un id de usuario y pagina por url y usaremos este como prioridad para hacer el listado, sino utilizamos el id del usuario identificado: "if(req.params.id && req.params.page){
+    userId = req.params.id;
+}"
+
+//Creamos una variable page con valor por defecto 1 para establecer, en caso de que el valor de la pagina nos llegue por la url reemplazamos: "if(req.params.page){
+    page = req.params.page;
+} else{
+    page = req.params.id;
+}"
+
+//Creamos una variable itemsPerPage y le asignamos un valor 
+
+//Llamamos al modelo y hacemos un find para encontrar los follow y buscar todos los follows donde un mismo usuario este siguiendo a otros, para esto le pasamos el usuario en cuestión como un json {user: userId} que es la variable donde recogemos el id, estos datos los populamos y cambiamos el path del objeto(es decir que al retornanos un objeto follow, el id del usuario seguido será reemplazado por todo el objeto de ese usuario con todos susu datos) y hacemos la paginacion, a este metodo se le pasa como parametros, page, itemsPerPage y una función callback con parametros como (err, follows, total)
+
+//Si da un error, mandamos un return con mensaje de error, si no existen follows retornamos un mensaje diciendo que no hay follows
+
+//Si todo va bien hacemos un return que va a contener la variable total donde irá el total de documents en la cirección
+
+//Llevará también el numero de variables, esto será: pages: Math.ceil(total/itemsPerPage) y por ultimo los follows, que creará una propiedad con todos los objetos encontrados dentro
+
+//El codigo del metodo quedaría de la siguiente manera: "function getFollowingUsers(req, res){
+    var userId = req.user.sub;
+
+    if(req.params.id && req.params.page){
+        userId = req.params.id;
+    }
+
+    var page = 1;
+
+    if(req.params.page){
+        page = req.params.page;
+    } 
+
+    var itemsPerPage = 4;
+
+    Follow.find({user: userId}).populate({path: 'followed'}).paginate(page, itemsPerPage, (err, follows, total) => {
+        if(err) res.status(500).send({message: 'Error en el servidor'}); 
+
+        if(!follows) return res.status(404).send({message: 'No estás siguiendo a ningún usuario'});
+
+        return res.status(200).send({
+            total: total,
+            pages: MAth.ceil(total/itemsPerPage),
+            follows
+        });
+    });
+
+
+}"
+
+//exportamos el metodo
+
+//creamos la ruta con get tal que: "api.get('/following/:id?/:page?', md_auth.ensureAuth, FollowController.getFollowingUsers);" indicamos los parametros id y page como opcionales 
+
+//Para probar en el postman pasamos el header de autorizacion y en la url el id del usuario seguidor y las paginas 
+
+---------/*Listado de seguidores*/---------
+
+//Creamos un nuevo metodo getFollowedUsers que reciba un req y un res
+
+//Podemos copiar el codigo del método anterior, haciendo uns ligeros cambios, el codigo quedaría de la siguiente manera: "function getFollowingsUsers(req, res){
+    var userId = req.user.sub;
+
+    if(req.params.id && req.params.page){
+        userId = req.params.id;
+    } 
+
+    var page = 1;
+
+    if(req.params.page){
+        page = req.params.page;
+    } else{
+        page = req.params.id;
+    }
+
+    var itemsPerPage = 4;
+
+    Follow.find({followed: userId}).populate('user followed').paginate(page, itemsPerPage, (err, follows, total) => {
+        if(err) return res.status(500).send({message: 'Error en el servidor'});
+
+        if(!follows) return res. status(404).send({message: 'No te sigue ningún usuario'});
+
+        return res.status(200).send({
+            total: total,
+            pages: Math.ceil(total/itemsPerPage),
+            follows
+        });
+    });
+}" cambiamos en el metodo find el json que recibe como parametro quedando "{followed: userId}" para que busque en el documento de follows todas las persona que siguen al usuario del que se le pasa el id. En el populate, quitamos el path y le pasamos los parametros "user " para que nos devuelva el objeto embebido dentro de esa propiedad. También se cambia el mensaje en caso de que no exista algún usuario seguidor.
+
+//Exportamos el metodo
+
+//Creamos una nueva ruta tal que: "api.get('/followed/:id?/:page?', md_auth.ensureAuth, FollowController.getFollowedUsers);"
+
+//Para probar en el postman procedemos de la misma manera del metodo anterior
+
+ ---------/*Listados de usuarios sin paginar*/---------
+
+ //Creamos una función que reciba req y res de nombre getMyFollows, esta función puede o no recibir un parametro por la url, si lo recibe buscara y devolverá una lista de seguidores que tengo, sino buscara y devolverá las personas a las que sigo
+
+ //Se crea una variable que recoga en id de usuario identificado
+
+ //Se crea una variable que almacene en modelo Follow con el metodo find al que se le pasa que busque los follows donde yo sigo a alguien es decir "{user: userId}"
+
+ //Se comprueba si existe el parametro followed por url, si esto es cierto, entonces la variable que contiene al modelo cambian el json de busqueda por "{followed: userId}"
+
+ //Luego se toma la variable que contiene al metodo y se la popula de tal forma que embeba tanto a la propiedad user, como a la propiedad followed yse le pone un ".exec()" al cual se le pasa un callback que recibe un posible error y un parametro follows
+
+ //si todo esta correcto retorna la lista de follows, el codigo quedaría de l siguiente forma: "function getMyFollows(req, res){
+     var userId = req.user.sub;
+
+     var find = Follow.find({user: userId});
+
+     if(req.params.followed){
+         find = Follow.fins({followed: userId});
+     }
+
+     find.populate('user followed').exec((err, follows) => {
+         if(err) return res.status(500).send({message: 'Error en el servidor'});
+
+         if(!follows) return res.status(404).send({message: 'No sigues ningún usuario'});
+
+         return res.status(200).send({follows});
+
+     });
+ }"
+
+ //Se exporta el metodo
+
+ //Se crea la ruta por medio de get, tal que: "api.get('get-my-follows/:followed', md_auth.ensureAuth, FollowController.getMyFollows);"
+
+ ---------/*Sigo a este usuario?*/---------
+
+ //Se deben editar en el controlador de usuarios los metodos getUser y getUsers para comprobar si esos usuarios nos estan siguiendo
+
+//Empezamos en getUser
+
+//Se debe hacer una petición a la entidad del follow para comprobar si ese usuario nos sigue a nosotros y también si lo seguimos o no
+
+//Cargamos el modelo Follow tal que: "var Follow = require('../models/follow')"
+
+//En el metodo gtUser agregamos la siguiente línea antes del return final: "Follow.findOne({"user": req.user.sub, "followed": userId}).exec((err, follow) => {
+    if(err) return res.status(500).send({message: 'Error al comprobar el seguimiento'});
+
+    return res.status(200).send({user, follow});
+});" La última línes de return se elimina ya que se reemplaza con la que está dentro del query de búsqueda
+
+
+//Para probar en el postman debemos pasar en la ruta el id del usuario que queremos comprobar el seguimiento y en el header el token del usuario identificado
+
+---------/*Async y Await*/---------
+
+//NodeJs trabaja de manera asíncrona, por tanto no deja manejar (por poner un ejemplo), dos return dentro de una misma función, distinto a la manera de trabajar de PHP.
+
+//En el metodo anteriormente editado (getUser), devolvemos el usuario al que seguimos, pero no podríamos retornar de forma normal la respuesta de si ese usuario también nos sigue
+
+//Por lo tanto debemos editar el método de la siguiente manera, para poder ejecutar otro find que nos devuelva dicha respuesta
+
+//Para realizar este tipo de cosas utilizamos async y await
+
+//Para crear una función asincrona la definimos como una función normal anteponiendo la palabra "async" (async function followThisUser), en este caso, para lo que queremos realizar le pasamos dos parametros (identity_user_id, user_id)
+
+//Esta función la podemos ejecutar en cualquier parte del documento. Dentro de la función asíncrona podemos realizar consultas síncronas, es decir que cuando se ejecute algo espere a que se consiga el resultado y pase a lo siguiente
+
+//Creamos una variable following, donde llamamos al modelo Follow anteponiendo el metodo await para que sea una llamada síncrona y realizamos el findOne de usuario a los que sigo tal cual estaba en el metodo getUser, remplazando en el json los parametros a recibir por lo que se tienen en la función asíncrona, tal que"({"user": identity_user_id, "followed": user_id})", para estan función retornamos solo un error si existe, o sino devolvemos el follow 
+
+//El código de esta variable quedaría de la siguiente forma: "var following = await Follow.findOne({"user": identity_user_id, "followed": user_id}).exec((err, follow) => {
+    if(err) return handleError(err);
+    return follow;
+});" handleError es un error de nodeJs que se muestra por consola.
+
+//Creamos una variable followed con la misma estructura de la variable following, invirtiendo los parametro de búsqueda del json que se le pasa al findOne. El código quedaría así: "var followed = await Follow.findOne({"user": user_id, "followed": identity_user_id}).exec((err, follow) => {
+    if(err) return handleError(err);
+    return follow;
+});" Esta función nos debe devolver una respuesta de si el usuario en cuestión nos sigue o no
+
+//En el return global de la función devolvemos un json que contenga los objetos devueltos por cada una de las funciones: "return {
+    following: following,
+    followed: followed
+}"
+
+//El codigo de la función followThisUser nos quedaría de la siguiente forma: "async function followThisUser(identity_user_id, user_id){
+    
+    var following = await Follow.findOne({user:identity_user_id, followed:user_id}).exec().then((following) => {
+        return following;
+    }).catch((err) => {
+        return handleError(err);
+    });
+
+    var followed = await Follow.findOne({user:user_id, followed:identity_user_id}).exec().then((followed) => {
+        return followed;
+    }).catch((err) => {
+        return handleError(err);
+    });
+
+    return {
+        following: following,
+        followed: followed
+    };
+
+}"
+
+//Al utilizar el método async, este nos devuelve una promesa (promise), por lo tanto tendremos un then 
+
+//En el metodo getUser, podemo reemplazar el query de búsqueda llamando al metodo followThisUser, al que se le pasará como primer parámetro el req.user.sub y luego el userID, como este metodo devuelve una promesa, podemos hacer uso de la popiedad ".then((value) => {
+
+    user.password = undefined;
+    return res.status(200).send({
+        user, 
+        following: value.following,
+        followed: value.followed
+    });
+})" esta función nos devolverá un callback con el value y dentro de la misma podemos devolver los valores obtenidos en el query. Seteamos la password como indefinida para que no se ha devuelta como propiedad del objeto. El values puede haber sido devuelto como un objeto completo, pero por cuestiones de organización, es mejor dividir tal que: "following: value.following"
+
+
+//Para probar en postman pasamos en header de autorizacion el token del usuario loggeado y por url mandamos el id del usuario que queremos comprobar seguimiento
+
+---------/*Id's de usuario, comprobar el seguimiento*/---------
+
+//En esta sección se modificará el metodo getUsers, trabajaremos tal como en el metodo anterior con funciones asíncronas y generando dentro funciones síncronas, para poder devolver un array de usuarios seguidos y otro array con usuarios seguidores
+
+//creamos una funcion asíncrona llamada followUserIds la cual recibe un solo parametro "user_id"
+
+//Creamos una variable following en la que vamos a llamar al modelo Follow anteponiendo el await y el metodo find y le pedimos todos los documentos donde el usuario seguidor sea el usuario logeado, de aquí usamos el metodo select para marcar los campos que no queremos que se muestren en un json tal que 0 indicará que no los muestre: "{'_id':0, '__v':0, 'user':0}" llamamos al exec y podemos ponerle dentro una función callback o en caso de que no funcione recurrir al metodo then y luego catch, retornamos follows
+
+//Creamos fuera una variable "following_clean = []" que es un array que contendrá los usuarios que seguimos, luego hacemos un foreach a following, al cual le pasamos un callback con parametro follow en el que hacemos un push a follwing_clean agregando follow.followed 
+
+//Luego retornamos follows_clean;
+
+//Creamos una variable followed en la que vamos a llamar al modelo Follow anteponiendo el await y el metodo find y le pedimos todos los documentos donde el usuario seguido sea el usuario logeado, de aquí usamos el metodo select para marcar los campos que no queremos que se muestren en un json tal que 0 indicará que no los muestre: "{'_id':0, '__v':0, 'followed':0}" llamamos al exec y podemos ponerle dentro una función callback o en caso de que no funcione recurrir al metodo then y luego catch, retornamos los follows
+
+//Creamos fuera una variable "followed_clean = []" que es un array que contendrá los usuarios que seguimos, luego hacemos un foreach a followed, al cual le pasamos un callback con parametro follow en el que hacemos un push a follwed_clean agregando follow.user
+
+//Luego retornamos follows_clean
+
+//Luego nos vamos al return global de la función y devolvemos un objeto con las dos variable que obtuvimos "following: following_clean,
+followed: followed_clean"
+
+//El codigo de la función quedaría de la siguiente manera: "async function followUserIds(user_id){
+    var following = await Follow.find({user: user_id}).select({'_id':0, '__v':0, 'user':0}).exec((err, follows) => {
+        return follows;
+    });
+
+    var followed = await Follow.find({followed: userId}).select({'_id':0, '__v':0, 'followed':0}).exec((err, follows) => {
+        return follows;
+    });
+
+    var following_clean = [];
+
+    following.foreach((follow) => {
+        following_clean.push(follow.followed);
+    });
+
+    var followed_clean = [];
+
+    followed.foreach((follow) => {
+        followed_clean.push(follow.user)
+    });
+
+    return {
+        following: following_clean,
+        followed: follwed_clean
+    }
+}"
+
+//Nos vamos al metod getUsers y hacemos la llamada al metodo, pasandole el parametro de id, luego respondemos al then que le pasamos un parametro value para hacer callback, dentro ponemos la respuesta general del api y dentro del objeto que devuelve la api, creamos dos propiedades para devolver lo que nos devuelve followUserIds tal que: "users_following: values.following,
+users_followed: values.followed"
+
+---------/*Contadores de usuarios, devolver contadores y estadísticas*/---------
+
+//En el controlador de usuario creamos un nuevo metodo llamado getCounters que nos devolvera los contadore de cuantos usuarios nos sigues, a cuantos seguimos y publicaciones(se añadirá después cuando esté listo el modulo de publicaciones)
+
+//El metodo recibe req y res, dentro le creamos una variable userId que recoja el id del usuario loggeado
+
+//Hacemos aparte una funcion asíncorna getCountFollow y le pasamos un user_id
+
+//Declaramos una variable following en la que llamamos al modelo Follow anteponiendo el await, le pasamos el metodo count con la condición {"user": user_id}, le damos exec y dentro le pasamos un callback que tendrá un posible error y devolverá un count (también se puede hacer pasandole el metodo then en lugar d ela función de callback), preguntamos dentro del callback si hay error y mandamos un mensaje por consola, sino retornamos el count 
+
+//Declaramos una variable followed en la que llamamos al modelo Follow anteponiendo el await, le pasamos el metodo count con la condición {"followed": user_id}, le damos exec y dentro le pasamos un callback que tendrá un posible error y devolverá un count (también se puede hacer pasandole el metodo then en lugar d ela función de callback), preguntamos dentro del callback si hay error y mandamos un mensaje por consola, sino retornamos el count 
+
+//En el return global de la variable retornamos un objeto que  tenga "following: following,
+followed: followed"
+
+//La función getCountFollow quedaría tal que: "async function getCountFollow(user_id){
+
+    var following = await Follow.count({user: user_id}).exec().then((count) => {
+        return count;
+    }).catch((err) => {
+        return handleError(err);
+    });
+
+    var followed = await Follow.count({followed: user_id}).exec().then((count) => {
+        return count;
+    }).catch((err) => {
+        return handleError(err);
+    });
+
+    return {
+        following: following,
+        followed: followed
+    }
+
+}"
+
+//Dentro de getCounters preguntamos si se recibe por url un id de usuario, de ser así almacenamos ese valor en la variable userId
+
+//Llamamos a la funcion getCountFollow, le pasamos el valor userId y llamamos al then en este pasamos una función callback que nos devuelve un value como respuesta y es esto lo que retornamos
+
+//La función getCounters quedaría de la siguiente forma: "function getCounters(req, res){
+
+    var userId = req.user.sub;
+
+    if(req.params.id){
+        userId = req.params.id;
+    }
+
+    getCountFollow(userId).then((value) => {
+        return res.status(200).send({value});
+    });
+
+}"
+
+//exportamos el metodo 
+
+//creamos la ruta por get tal que: "api.get('/counters/:id?', md_auth.ensureAuth, UserController.getCounters)"
+
+//Para probar en el postman pasamos en la cabezara el token de autorizacion y pasamos un id de usuario por el url, si no lo pasamos nos cargará los datos del usuario loggeado
+
+---------/*Controlador y rutas de publicaciones*/---------
+
+//Creamos un controlador para las publicaciones "publications.js"
+
+//Definimos 'use strict'
+
+//Creamos variables para declarar el path, fs, moment, mongoose-pagination 
+
+//Creamos una variable para cada modelo, Publication, User y Follow
+
+//Creamos un metodo de prueba que reciba un req y res, tal que: "function prueba(req, res){
+    res.status(200).send({
+        message: "Hola desde el controlador Publication"
+    });
+}"
+
+//Exportamos el modulo: "module.exports = {
+    prueba
+}"
+
+//En la carpeta de rutas, creamos un archivo de rutas "publication.js"
+
+//Declaramos 'use strict'
+
+//Cargamos las librerías y controladores, express, PublicationController, una variable llamada api con el metodo Router de express, importamos también el middleware de auntenticación
+
+//Cargamos la libreria multiparty y creamos un middleware de subida de archivos tal que "var md_upload = multipart({ uploadDir: './uploads/publications'})"
+
+//Creamos la carpeta publications dentro de la carpeta uploads para establecer la ruta
+
+//Definimos la ruta del metodo de prueba tal que: "api.get('/probando-pub', md_auth.ensureAuth, PublicationController.prueba)"
+
+//Exportamos el api
+
+//Cargamos el fichero de ruta en el app.js tal que: "publication_routes = require('./routes/publication')"
+
+//Realizamos la configuración de la ruta para que pasen por '/api', quedando: "app.use('/api', publication_routes)"
+
+//Para probar en el postman solo debemos de pasar el token de autorización 
+
+---------/*Guardar Nuevas publicaciones*/---------
+
+//Creamos una funcrion savePublication con req y res
+
+//Declaramos una variable que almacene los parametros que llegan por la petición hecha por post del formulario "var params = req.body;"
+
+//Comprobamos si dentro de los parametros nuestra publicación no contiene texto, de ser así retornamos un mensaje diciendo que se debe enviar una publicación con texto
+
+//Declaramos una variable publication que llame un nuevo modelo de Publication 
+
+//llamamos a nuestro nuevo objeto publication y su propiedad .text, dentro de esta almacenamos lo que se encuentre dentro de params.text
+
+//declaramos publication.file como null ya que de momento no subiremos archivos
+
+//Declaramos publication.user y dentro guardamos el ide del usuario identificado
+
+//Declaramos publication.created_at y le guardamos la fecha usando la librería momenty el metodo unix
+
+//Una vez seteada la información, la guardamos con un save que nos devuelve una función de callback con un err y un publication followStores
+
+//Comprobamos si hay error y si lo hay devolvemos un mensaje que lo indique
+
+//Comprobamos si se nos devuelve un objeto como resultado, es decir si no nos devuelve el objeto, retornamos un mensaje de que no se ha guardado la publicación
+
+//Sino retornamos el objeto publicationStored en una propiedad publication
+
+//El método quedaría de la siguiente forma: "function saveUser(req, res){
+    var params = req.body;
+
+    if(!params.text) return res.status(200).send({ message: 'Se debe enviar una publicación que contenga texto'});
+
+    var publication = new Publication();
+
+    publication.text = params.text;
+    publication.file = null;
+    publication.user = req.user.sub;
+    publication.created_at = moment().unix();
+
+    publication.save((err, publicationStored) => {
+        if(err) return res.status(500).send({message: 'Error en la petición de guardado'});
+
+        if(!publicationStored) return res.status(404).send({message: 'No se ha guardado la publicación'});
+
+        return res.status(200).send({publication: publicationStored});
+    });
+}"
+
+//Exportamos el metodo
+
+//Creamos una ruta por post tal que: "api.post('/publication', md_auth.ensureAuth, PublicationController.savePublication)"
+
+//Para probar en el postaman pasamos el token de autorizacion y en el form-urlencode del body le pasamos una publicacion, una propiedad text con algo escrito
+
+---------/*Método publicaciones Timeline*/---------
+
+//En el controlador creamos un nuevo metodo getPublications que nos devolverá todas las publicaciones de los usurio que se están siguiendo
+
+//El metodo recogera el id del usuario identificado, se hará un find de los usuarios seguidos y después buscará las publicaciones de esos usuarios y devolverlas
+
+//El metodo tendrá como parametro req y res
+
+//Se crea la variable pagina y se le asigna valor 1 por defecto, luego se comprueba si se nos está pasando una página por url "req.params.page" y si es así guardamos este dato dentro de la variable page
+
+//Creamos la variable itemsPerPage y le asignamos un valor
+
+//Utilizamos el modelo Follow y hacemos un find buscando con la propiedad user y se le pasa el id del usuario identificado, es decir buscamos a todos los usuario que seguimos, este resultado se puede popular para sustituirel id del usuario por el objeto completo al que hace referencia y cargamos la propiedad followed, luego hacemos un exec que recibe una función de callback que devuelve un posible erro y los follows (recordar que la función interna de callback de un exec no siempre funciona y se puede sustituir con un .then y .catch) si se produce algún error, mostramos un mensaje de error
+
+//Creamos una variable follows_clean que sea un array
+
+//Llamamos a nuestro objeto follows y le realizamos un forEach, dentro ponemos un callback al cual le indicamos que por caada iteración que nos devuelva un follow del objeto follows, haga un push de ese follow con la propiedad followed al objeto follows_clean
+
+//Llamaos al modelo Publication y le hacemos un find al cual le pasamos como parametro un json de la siguiente manera "{user: {"$in": follows_clean}}" con el "$in" lo que hacemos es buscar una coincidencia de los usuarios guardados en el array follows_clean y las publicaciones hechas, esto de aquí le hacemos un sort para ordenar de la más reciente a más antigua tal que ".sort('-created_at')" y le hacemos un populate con el objeto del usuario para que nos devuelva sus datos completos pasandole como parametro adicional "{'password':0}" para que no muestre la contraseña del usuario y llamamos al paginate al cual le vamos a pasar como parametros la variable page, itemsPerPage y un callback que contendrá un posible error, las publicaciones y un total
+
+//Dentro del callback si se genera algún error mandamos un mensaje
+
+//Si no devuelve ninguna publicación mandamos un mensaje 404
+
+//Si todo está bien retornamos un objeto que contenga el total de elementos, las publicaciones y se podría pasar la páginas usando Math.ceil y la pagina actual 
+
+//El codigo de la función quedaría tal que: "function getPublications(req, res){
+
+    var page = 1;
+
+    if(req.params.page){
+        page = req.params.page;
+    }
+
+    var itemsPerPage = 4;
+
+    Follow.find({user: req.user.sub}).populate('followed').exec((err, follows) => {
+        if(err) return res.status(500).send({message: 'Error devolviendo el seguimiento'});
+
+        if(!follows) return res.status(404).send({message: 'No estás siguiendo a ningún usuario'});
+
+        var followed_clean = [];
+
+        follows.forEach((follow) => {
+            follow.password = undefined;
+            followed_clean.push(follow.followed);
+        });
+
+        Publication.find({user: {"$in": followed_clean}}).sort('-created_at').populate('user', {'password':0}).paginate(page, itemsPerPage, (err, publications, total) => {
+            if(err) return res.status(500).send({message: 'Erro al devolver las publicaciones'});
+
+            if(!publications) return res.status(404).send({message: 'No existe publicaciones para mostrar'});
+
+            return res.status(200).send({
+                total_items: total,
+                pages: Math.ceil(total/itemsPerPage),
+                page: page,
+                publications
+            });
+        });
+
+    });
+}"
+
+//Exportamos el metodo
+
+//Creamos la ruta por get tal que: "api.get('/publication/:page?', md_auth.ensureAuth, PublicationController.getPublications)"
+
+//Para probar en el postman solo debemos pasar el token de autenticación de usuario y opcional se pasa por url la pagina a mostrar
+
+---------/*Devolver una publicación*/---------
+
+//Creamos un metodo en el controlador de publicaciones getPublication con req y res
+
+//Declaramos una variable para recoger por url el id de una publicacion
+
+//Llamamos al modelo Publication y hacemos un findByID, este metodo recibe dos parametros, el id de la publicación y un callback que retornará un posible error y una publicacion
+
+//Si hay error mandamos un mensaje de erro
+
+//si no existe la publicacion mandamos un mensaje 404 de no existencia
+
+//Sino retornamos la publicacion como objeto json
+
+//Exportamos e metodo
+
+//En el archivo de rutas creamos una nueva ruta por get tal que: "api.get('/publication/:id', md_auth.ensureAuth, PublicationController.getPublication);"
+
+//Para probar en el postman deebemos pasar el token de autenticación de usuario y un id de publicación por url
+
+---------/*Eliminar una publicación*/---------
+
+//Creamos un metodo deletePublication que recibe un req y un res
+
+//Creamos una variable que recoga el id de la publicación
+
+//Llamamos al modelo Publication y utilizamos el metodo find al que le pasamos como parametro un objeto json que indique buscar el user con el id de usuario autenticado y la publicación con el id que se recibe por url, luego hacemos un remove que recibirá un callback con un posible error 
+
+//Nota: Pasamos nuestro id de usuario autenticado porque se debe demostrar que la publicación es del usuario que la solicita
+
+//Dentro del callback comprobamos si se produce algún error y mandamos un mensaje
+
+//Si no hay error mandamos un mensaje que la publicación ha sido eliminada
+
+//El codigo de la función quedaría: "
+function deletePublication(req, res){
+    var publicatioId = req.params.id;
+
+    Publication.find({'user': req.user.sub, '_id': publicatioId}).remove((err, publicationRemoved) => {
+        if(err) return res.status(500).send({message: 'Error al intentar eliminar la publicación'});
+
+        if(publicationRemoved) return res.status(404).send({message: 'La publicación no existe o ya ha sido eliminada'});
+
+        return res.status(200).send({message: 'La publicación ha sido eliminada'});
+    });
+}"
+
+//Exportamos el metodo
+
+//En el archivo de rutas creamos una ruta por delete tal que: "api.delete('publication/:id', md_auth.ensureAuth, PublicationController.deletePublication);"
+
+//Para probar el postman debemos pasar el token de autenticacion de usuario y un id de publicacion
+
+---------/*Subir ficheros a una publicación*/---------
+
+//Creamos un metodo para subir archivo de imagen de usuario
+
+//Importamos la libreria fs tal que: "var fs = require('fs');"
+
+//Importamos la libreria path tal que: "var path = require('path');"
+
+//En el controlador creamos una funcion uploadImage con parametros req y res
+
+//Declaramos una variable publicationId 
+
+//Dentro de la req hay una propiedad llamada files que tiene un array de los archivo que intentaremos subir
+
+//Si esto es cierto, entonces, creamos una variable file_path y esto va a ser igual al req.files.image.path, es decir, le pasamos la ubicacion de imagen a la propiedad file del req, también hacemos un else donde retornaremos un mensaje que indique que no se subieron archivos
+
+//Declaramos la varible file_spli donde cortaremos el nombre del archivo que será igual a "file_path.split('\\')" (la primer barra indica que se separará por un caracter especial, la segunda indica el caracter por el cual se separa)
+
+//Declaramos una variable que va a contener solo el nombre del archivo y no toda la ruta, decimos: "var file_name = file_split[2];"
+
+//Declaramos una variable para separar la extension del archivo tal que: "var ext_split = finale_name.split('\.')"
+
+//Luego creamos una variable donde vamos a almacenar solo la extension del archivo: "var file_ext = ext_split[1];"
+
+
+//Comprobamos que si la extension del archivo es igual a png o jpg o jpeg o gif
+
+//Llamamos al modelo Publication y realizamos un findOne al que le pasamos como parametros el id del usuario logeado y el id de la publicación, realizamos un exec con callback o bien un then y si retornamos una publicación, pasamos al siguiente paso, sino  retornamos el metodo de borrado de archivos con un mensaje de no permisos para editar
+
+//llamando al modelo Publication y usando el metodo findByIdAndUpdate a la cual le pasamos como parametros el publicationId, un json tal que "{file: file_name}", se le pasa el json para que nos devuelva el objeto actualizado y el callback con un posible error y un objeto publicationUpdated
+
+//En caso de que la extension de archivo no sea correcta, por el else eliminamos el archivo tal que: "fs.unlink(file_path, (err) => {})" y mandamos un mensaje de extension no valida en el callback, esta funcion de borrado la podemos crear como metodo privado, para eliminar el archivo también en caso de que los id no concuerden al principio del metodo o en esta misma parte, esta funcion no se necesita exportar ya que solo se utilizara dentro del metodo de carga de imagen
+
+//La funcion para remover archivos quedaria de la siguiente forma: "function removeFilesOfUploads(res, file_path, message){
+    fs.unlink(file_path, (err) => {
+        return res.status(200).send({message:message});
+    });
+}" se tiene en cuenta que se pasa parametro res, file_path y message  - (se recomienda poner un return antes de llamar a esta funcion para cortar procesos y evitar que siga corriendo el metodo principal)
+
+//El metodo uploadImage quedaría de la siguiente forma: "function uploadImage(req, res){
+    var publicationId = req.params.id;
+
+    if(req.files){
+        var file_path = req.files.image.path;
+        var file_split = file_path.split('\\');
+        var file_name = file_split[2];
+        var ext_split = file_name.split('\.');
+        var file_ext = ext_split[1];
+
+        if(file_ext == 'jpg' || file_ext == 'jpeg' || file_ext == 'gif' || file_ext == 'png'){
+
+            Publication.findOne({'user': req.user.sub, '_id': publicationId}).exec().then((publication) => {
+
+                if(publication){
+
+                    Publication.findOneAndUpdate(publicationId, {file: file_name}, {new: true}, (err, publicationUpdated) => {
+
+                        if(err) return res.status(500).send({message: 'Error en el servidor al intentar actualizar archivo'});
+    
+                        if(!publicationUpdated) return res.status(404).send({message: 'No se ha podido actualizar la publicación'});
+    
+                        return res.status(200).send({publication: publicationUpdated});
+    
+                    });
+    
+                } else{
+                    removeFilesOfUploads(res, file_path, 'No tienes permiso para editar esta publicación');
+                }
+
+            }).catch((err) => {
+
+                return res.status(500).send({message: 'Error al buscar la publicación'});
+
+            });
+        } else {
+            removeFilesOfUploads(res, file_path, 'Extensión no válida');
+        }
+
+    } else {
+
+        return res.status(500).send({message: 'No se subieron archivos'});
+
+    }
+}"
+
+//Exportamos el metodo uploadImage
+
+
+//Creamo una carpeta uploads en api y dentro de uploads, creamos una de nombre users
+
+//En el archivo rutas cargamos el componete multiparty tal que: "var multipart = require('connect-multiparty');"
+
+//Luego creamos una nueva ruta de middleware así: "md_upload = multipart({uploadDir: './uploads/publications}');"
+
+//Creamos la ruta tal que: "api.post('/upload-image-pub/:id', [md_auth.ensureAuth, md_upload], PublicationController.uploadImage);"
+
+//Para probar en postman debemos logearnos, pasar el id de la publicación, poner el token en el header como authorization y en el body en form-data, cambiamos el tipo de archivo  y cargamos
+
+---------/*Devolver Imagenes de Publicaciones*/---------
+
+//Este metodo nos devolvera una url protegida que contendra la imagen
+
+//En el controlador creamos una funcione getImageFile con parametros req y res, dentro creamos una variable image_file que será igual al req.params.imageFile
+
+//Creamos una variable path_file que tendrá el path de las imagenes de usuario, es decir le pasamos "'./uploads/publications' + image_file"
+
+//Luego comprobamos si el directorio existe con: "fs.exist()" a esa función le pasamos el path_file y una función de callback que tendrá un exist de true o false, si existe hacemos "res.sendFile(path.resolve(path_file))" (sendFile es un metodo propio de la respuesta de express) y en el else mandamos un mensaje de que no existe la imagen 
+
+//El codigo quedaría de la siguiente forma: "function getImageFile(req, res){
+    
+    var image_file = req.params.imageFile;
+    var path_file = './uploads/publications/'+image_file;
+    
+    fs.exists(path_file, (exists) => {
+        if(exists){
+            res.sendFile(path.resolve(path_file));
+        } else {
+            res.status(200).send({message: 'No existe la imagen'});
+        }
+    });
+}"
+
+//Exportamos el metodo
+
+//creamos una ruta por get "('/get-image-pub/:imageFile', PublicationController.getImageFile);"
+
+//Para probar en el postman, se recomienda hacer el login y copiar el nombre de la imagen que se devuelve y pegarlo en la url de petición de prueba para comprobar
+
+---------/*Número total de publicaciones*/---------
+
+//En el controlador user, importamos el modelo Publication
+
+//En la funcion asíncrona getcountFollow creamos una variable publications y llamaos al modelo Publication anteponiendo el await y le decimos que cuente las publicaciones donde user sea igual user_id, hacemos un exec y le pasamos una función callback con un posible error y un counters
+
+//Verificamos si hay un error y pasamos un mensaje, sino retornamos el count
+
+//Agregamos al objeto de retorno una propiedad publications y le pasamos la variable publications
+
+---------/*Mensajería privada: Mejoras del modelo Message*/---------
+
+//Dentro del modelo Message, le añadimos un campo viewed de tipo String que guardará si el mensaje ha sido visto o no
+
+---------/*Crear controlador, acciones y rutas*/---------
+
+//En la carpeta controllers creamos un fichero message.js 
+
+//Ponemos la instrucción 'use strict'
+
+//Cargamos la librería moment, mongoose-pagination y los modelos User, Follow y Message
+
+//Creamos un metodo de prueba que le pasamos un req y res, del cual devolvemos un mensaje
+
+//Exportamos el modelo
+
+//Creamos en la carpeta ruta un fichero message.js
+
+//Declaramos 'use strict'
+
+//declaramos una variable con express
+
+//Llamamos al controlado Message
+
+//Creamos una variable api que llame al metodo Router de express
+
+//Llamamos al middleware de autenticacion
+
+//Creamos una ruta por get tal que: "api.get('/pronbando-ms', md_auth.ensureAuth, MessageController.prueba)"
+
+//Exportamos la api
+
+//En el app.js, hacemos el cargado de ruta: "var message_routes = require('./routes/message');"
+
+//y agregamos la configuración de ruta para que pase por el api: "app.use('/api', message_routes);"
+
+//Probamos en el postman pasando el token de autenticacion
+
+---------/*Enviar el mensaje*/---------
+
+//Dentro del controlador creamos el metodo para enviar mensaje saveMessage que le pasamos req y res
+
+//recogemos los parametros recibidos por post: "var params = req.body;"
+
+//Comprobamos si por post nos llegan o no los parametros text o receiver, de ser que no nos llegue alguna de las dos retornamos un mensaje de rellenar los campos
+
+//Creamos una variable que contenga el modelo Message
+
+//Seteamos los valores dentro de la variable del modelo message, donde message.emmiter lo sacamos del usuario identificado con req.user.sub
+
+//message.receiver y message.text los sacamos de la variable params que recoge las variables en el post de formulario
+
+//message.created_at lo sacamos con moment y el metodo unix
+
+//Guardamos el mensaje con el metodo save que tendrá un callback con un error o un messageStored, si nos da error mandamos un mensaje de error de petición, si no nos devuelve el messagestored decimos que no se guardó el mensaje
+
+//Si todo va bien retornamos un objeto json con messageStored
+
+//El código quedaría de la siguiente manera: "function saveMessage(req, res){
+    
+    var params =  req.body;
+
+    if(!params.text || !params.receiver) return res.status(200).send({message: 'Por favor, ingrese los campos necesarios'});
+
+    var message = new Message();
+
+    message.emitter = req.user.sub;
+    message.receiver = params.receiver;
+    message.text = params.text;
+    message.created_at = moment().unix();
+
+    message.save((err, messageStored) => {
+
+        if(err) return res.status(500).send({message: 'Error en la petición'});
+
+        if(!messageStored) return res.status(404).send({message: 'Error al guardar el mensaje'});
+
+        return res.status(200).send({message: messageStored});
+
+    });
+
+}"
+
+//Exportamos el metodo
+
+//Creamos una ruta por post tal que: "api.post('/messgae', md_auth.ensureAuth, MessageController.saveMessage)"
+
+//Probamos en el postman pasando en el form-urlencode, pasando un campos text y un campo receiver al que le pasamos un id, en la cabecera pasamos el token de autorizacion del usuario loggeado
+
+---------/*Mensajes recibidos*/---------
+
+//En el controlador creamos un metodo getReceivedMessages que reciba un req y res, el cual nos devuelve un listado paginado de los mensajes recibidos
+
+//Declaramos una variable userId, recogemos el id de usuario loggeado
+
+//Declaramos una variable page = 1 por defecto
+
+//si nos llega un valor de pagina por url, sustituimos el valor
+
+//Declaramos una variable itemsPerPage con un valor asiganado
+
+//Llamaos al modelo Message y usamos el metodo find al que le pasamos como metodo un objeto json con propiedad {receiver: userId} y hacemos un populat para el emmite y luego utilizamos el metodo paginate al que le pasamos una pagina, itemsPerPage y un callback que contendrá un posible error, los mensajes y un total de mensajes recibidos
+
+//Dentro del callback comprobamos is hay un error y de ser así devolvemos un mensaje de error de petición
+
+//Si no nos llegan mensajes devolvemos un error de que no hay mensajes por mostrar
+
+//Si todo está bien entonces devolvemos un objeto que contendrá "{
+    total:total,
+    pages: Math.ceil(total/itemsPerPage),
+    messages
+}"
+
+//El codigo quedaría de la siguiente forma:"function getReceivedMessages(req, res){
+    
+    var userId = req.user.sub;
+    var page = 1;
+    var itemsPerPage = 4;
+
+    if(req.params.page){
+        page = req.params.page;
+    }
+
+    Message.find({receiver: userId}).populate('emitter', {'password':0}).paginate(page, itemsPerPage, (err, messages, total) => {
+        
+        if(err) return res.status(500).send({message: 'Error en la petición'});
+
+        if(!messages) return res.status(404).send({message: 'No hay mensajes para mostrar'});
+
+        return res.status(200).send({
+            total: total,
+            pages: Math.ceil(total/itemsPerPage),
+            messages 
+        });
+
+    });
+
+}"
+
+//Dentro del populate, si queremos solo mostrar campos específicos se lo puede hacer de la siguiente forma: "populate('emitter', 'name surname nick image _id')" en el que el primer parametro que se pasa es lo que se va a popular y el segundo se pasan los campos separados por espacios nada más
+
+//Exportamos el método
+
+//Creamos la ruta en el fichero de rutas tal que: "api.get('/my-messages/:page?', md_auth.ensureAuth, MessageController.getReceivedMessages);"
+
+//Probamos en el postman pasando el token de usuario autenticado y un posible parametro page por url 
+
+---------/*Listado de mensajes enviados*/---------
+
+//Creamod un metodo getEmitMessages que  funcionará exactamente igual que el método anterior, salvo el caso de los parametros de búsqueda enviados en el find y los pasados en el populate
+
+//El codigo quedaría de la siguiente forma: "function getEmitMessages(req, res){
+    
+    var userId = req.user.sub;
+    var page = 1;
+    var itemsPerPage = 4;
+
+    if(req.params.page){
+        page = req.params.page;
+    }
+
+    Message.find({emitter: userId}).populate('emitter receiver', 'name surname nick image _id').paginate(page, itemsPerPage, (err, messages, total) => {
+        
+        if(err) return res.status(500).send({message: 'Error en la petición'});
+
+        if(!messages) return res.status(404).send({message: 'No hay mensajes para mostrar'});
+
+        return res.status(200).send({
+            total: total,
+            pages: Math.ceil(total/itemsPerPage),
+            messages 
+        });
+
+    });
+
+}"
+
+//Dentro del populate pasamos que nos popule tanto el emitter como el receiver
+
+//Exportamos el metodo
+
+//Creamos la ruta tal que: "api.get('/messages/:page?', md_auth.ensureAuth, MessageController.getEmitMessages)"
+
+//Probamos en el postman pasando el token de usuario autenticado y un posible parametro page por url 
+
+---------/*Contar mensajes sin leer*/---------
+
+//En el metodo saveMessage añadimos el seteo de la propiedad viewed tal que: "message.viewed = 'false';"
+
+//Creamos una funcion getUnviewedMessages con un req y res
+
+//recogemos el userId del usuario loggeado
+
+//llamamos al modelo Message y hacemos un count pasandoles cuando receiver sea userId y cuando viewed sea 'false', hacemos un exec que tendrá un callback con un posible error el cual devolveremos y si no hay error retornamos un objeto unviewed: count
+
+//Exportamos el metodo
+
+//Creamos la ruta por get, tal que: "api.get('/unviewed-messages', md_auth.ensureAuth, MessageController.getUnviewedMessages);"
+
+---------/*Marcar mensajes como leídos*/---------
+
+//Creamos un nuevo metodo setViewedMessages con req y res
+
+//Recogemos la variable userId del user identificado
+
+//Llamamos al modelos Message y usamos update, le pasamos las condiciones para que el receiver sea userId y viewed sea false, luego le pasamos otro objeto donde viewed sea true, luego le pasamos un tercer parametro, otro objeto json que contenga {"multi": true} para que actualice todos los documentos y no solo uno; y por ultimo le pasamos un callback que recibirá un posible error y un messagesUpdated
+
+//Si se produce el error mandamos un mensaje notificando
+
+//Retornamos directamente lo que nos devuelva el parametro messagesUpdated dentro de un objeto
+
+//Exportamos el metodo
+
+//creamos la ruta tal que api.get('/set-viewed-messages', md_auth.ensureAuth, MessageController.setViewedMessages);
+
+---------/*Configuración de cabeceras HTTP y acceso CORS*/---------
+
+//Esta configuracion es necesaria para evitar problemas al hacer peticiones desde el Angular al backend
+
+//En el fichero app.js, en la sección de cors ubicamos lo siguiente: 
+
+"app.use((req, res, next) => {
+    res.header('Access-Control-Allow-Origin', '*');
+    res.header('Access-Control-Allow-Headers', 'Authorization, X-API-KEY, Origin, X-Requested-With, Content-Type, Accept, Access-Control-Allow-Request-Method');
+    res.header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, DELETE');
+    res.header('Allow', 'GET, POST, OPTIONS, PUT, DELETE');
+ 
+    next();
+});"
+
+//1. En la primera cabecera permitimos el acceso a cualquier origen
+
+//2. En la segunda permitimos una serie de cabecera en cada petición, que pueden estar disponibles en cada petición 
+
+//3. En el tercero permitimos los métodos HTTP para hacer peticiones con ajax
+
+//4. En el cuarto permitimos las peticiones HTTP
+
+____________________________________________________________________
+
+----------------------- DESARROLLO EN ANGULAR ----------------------
+____________________________________________________________________
+
+---------/*Creación de proyecto y componentes*/---------
+
+//Creamos un proyecto dentro de la carpeta curso-mean-social llamado app-social
+
+//En la carpeta src de angular es donde se codificará
+
+//En el documento index.html estará cargada nuestra aplicación en el app-root que es el componente principal
+
+//Un componente es un segmente lógico que formará parte de la palicación
+
+//Podemos crear componentes para cualquier funcionalidad de angular, un componente no hace más que controlar una porción de pantalla
+
+//Los componentes poseen vistas o templates asociadas, esta es la que dará soporte al componente y en la cual se podrá tener interacción 
+
+//Los componentes poseen decoradores Ej: "@Component" que nos permiter obtener metadatos de las clases y componentes como el selector, la templete, los estilos, etc
+
+//Para crear componentes de manera manual, creamos un archivo "ejemplo.component.ts", dentro importamos la clase Component de '@angular/core'
+
+//Llamamos al decorador @Component, y dentro pasamos los metadatos como selector, estilos, plantillas, etc
+
+//Si dentro de una template queremos pasar html puro debemos usar las comillas simples invertidas -> ` <h2> Hola </h2> `
+
+//Luego debemos exportar la clase "export class EjemploCoponent{
+    public nombre = "EjemploComponent";
+}"
+
+//Podemos utilizar el doble binding para pasr variable que contengan algún resultado a mostrar "{{nombre}}"
+
+//Para mostrar un componente, se debe importar en el archivo "app.module.ts" y se pasa el nombre del componente en el array declarations
+
+//En el decorador @NgModule, en las declarations se pasan los componentes, en imports los modulos internos de angular o los que vayamops a crear, en providers se pasan los servicios internos o externos y en bootstrap cargamos el componente principal
+
+---------/*Directivas*/---------
+
+// Una directiva son funcionalidad aplicadas como para controlar que un div se muestre o no, para dar estilos, para recorrer listas, etc
+
+// "*ngIf" es una directiva que sirve para pasar condicionales en una etiqueta html en angular por ejemplo "<h2 *ngIf="mostrar_hola == true"> {{Hola}} </h2>" es decir si pasamos una variable hola de tipo boolean y si esta es true, se muestra el html del h2
+
+//"<h2 [style.background]="'yellow'" *ngIf="mostrar_hola != false"> {{Hola}} </h2>" este es otro ejemplo, en este se muestra si no es false y pone un fondo amarillo, el yellow debe ser pasado como un string con comillas simples o puede ser pasado como una propiedad declarada en la clase del componente
+
+//"*ngFor" es una directiva que sirve para recorrer un array "<h2> Listado de videojuegos </h2>
+<ul>
+    <li *ngFor="let game of videojuegos">{{game}}</li>
+</ul>" Si tenemos un array de videojuegos, usamos la directiva ngFor en un li, para que recorra este array y cada dato recorrido lo almacenará en la variable game que es la que muestra bindeando, esto nos creará un nuevo li por cada itereación
+
+---------/*¿Qué es typeScript?*/---------
+
+//85% Javascript normal
+//Nuevas funcionalidades del EcmaScript 6
+//Tipado fuerte
+//Orientación a objetos mejorada
+//Lenguaje interpretado (se transpila a JS)
+//Extensión de los archivos .ts
+//Superset de JS desarrollado por microsoft
+
+---------/*Tipos de datos*/---------
+
+//nombre:string = "";
+//mostrar_retro:boolean = true;
+//year:number = 2018;
+//videojuegos:Array<string> = [
+    'GTA V',
+    'Call of Duty'
+];
+//codigo:any = null;
+//videojuegos:Array<any> = [
+    'GTA V',
+    'Call of Duty',
+    68,
+    true
+];
+
+---------/*Introducción al front-end*/---------
+
+//Creamos nuestro proyecto con ng new nombreDelProyecto en la terminal
+
+//Podemos incializar el proyecto con ng serve en la dirección del proyecto o también con el comando npm start
+
+---------/*Instalacion de librerías externas*/---------
+
+//En el archivo package.json en el apartado dependencies, ponemos la libreía de bootstrap tal que: "bootstrap": "version" y en el caso de jquery: "jquery": "version" y luego usamos el comando "npm update"
+
+//También podemos instalarlas desde el npm ubicandonos en la carpeta del proyecto con el comando "npm install bootstrap --save"
+
+---------/*La barra de navegación*/---------
+
+//Limpiamos el app.component.html para maquetar nuestra barra de navegación
+
+//Creamos la siguiente etiqueta <div class="navigation col-lg-12"></div> (bootstrap está dividido en 12 columnas, por lo que al declarar la clase col con numero 12 decimos que es full width)
+
+//Dentro del div ponemos un <nav class="navbar navbar-default">
+    <div class="container-fluid">
+        <div class="navbar-header">
+            <a href="#" class="navbar-brand">{{title}}</a>
+        </div>
+    </div>
+</nav> (Las clases utilizadas dentro de las etiquetas son de bootstrap, en el ancla declaramos la marca o brand de la aplicación, por lo que bindeamos el nombre establecido en el app .component)
+
+//Para agregar links al navbar declaramos una etiqueta <ul> de clase "nav navbar-nav" y dentro ponemos un <li> con un <a> y <span> dentro del span podemos llamar un icono, dentro de la etiqueta <a> podemos poner la descripción del link, para este caso usé una plantilla de navbar de boostrap y los iconos de fontawesome
+
+//Para editar clases de css, podemos dirigirnos al archivo styles.css y editamos de la siguiente forma, por ejemplo: ".navigation {
+    margin: 0px;
+    padding: 0px !important
+}" usamos el "!important" para que se sobreescriban las propiedades
+
+---------/*Creación de componentes*/---------
+
+//Creamos una carpeta Components
+
+//Creamos un componente login y uno para registes con "ng g c Components/login" (g viene de generate en angular cli y la c de component)
+
+//Dentro del componente login declaramos una variable publica de tipo string y dentro del constructor le agrgamos un dato para mostrar, en este caso la variable es title y el contenido es "Idetifícate"
+
+//Esta variable la podemos imprimir en el html del componente por medio del doble bindeo
+
+//Para temas de comprobación, pasamos un mensaje por consola en el metodo ngOnInit
+
+//Realizamos lo mismo para el componente de registro
+
+//Cargamos los componentes en el app.module.ts, tal que: "import{ LoginComponent } from './Components/login/login.component';"
+
+//Y los llamosmos en el decorador NgModule en el array declarations (si los componentes son creados por npm, se agregan automaticamente en el app.module)
+
+
+---------/*Configuración de routing*/---------
+
+//Creamos en la carpeta app un archivo llamado app.routing.ts
+
+//También se puede crear directamente con "npm install router --save"
+
+//Exportamos las clases Routes y RouterModule al app.module
+
+//Dentro del coponente routing, importamos los componentes a utilizar, login y registro
+
+//creamos una variable de ti po Routes, donde se guardarán las rutas de nuestros componentes, así: "const routes: Routes = [
+  {path: '', component: LoginComponent},
+  {path: 'login', component: LoginComponent},
+  {path: 'registro', component: RegisterComponent}
+];"
+
+//Creamos una constante que será exportada, esta constante puede ser de tipo any y contendrá un obtejo RouterModule con las rutas: "RouterModule.forRoot(routes);" en el metodo forRoot se le pasan las rutas necesarias
+
+//En el app module hacemos la importación del modulo appRouting y de la constante routing para poder hacer uso de ellas, se las debe declarar también en el array imports
+
+//Para usar el routing,se debe utilizar la etiqueta <router-outlet> en el app.component.html
+
+
+---------/*Los Modelos*/---------
+
+//Creamos los modelos de nuestras entidades en una carpeta llamada models dentro de app, estos ficheros serán de extensión .ts
+
+//Los modelos deben quedar de la siguiete forma: "export class User{
+    constructor(
+        public _id: string,
+        public name: string,
+        public surname: string,
+        public nick: string,
+        public email: string,
+        public password: string,
+        public role: string,
+        public image: string
+    ){}
+}" se declaran las variables de manera directa en el constructor ya que es más efectivo y nos evita teneer que hacer una declaración, setear un valor e inicializarlas, dentro del constructor todo eso se resume
+
+
+---------/*Página y formulario de registro*/---------
+
+//En el app.module, importamos la clase FormsModule de @angular/forms y la clase HttpModule de @angular/http
+
+//Trabajaremos en el componente register
+
+//importamos los componentes Router, ActivatedRoute y Paramas que vienen de @angular/router
+
+//Importamos también el modelo User 
+
+//Configuramos las propiedades del router definiendo de manera privada un objeto _route de tipo ActivatedRoute y otro _router de tipo Router
+
+//En la clase del componente creamos una variable de tipo publica que será de tipo User
+
+//Dentro del constructor declaramos que el objeto user contendrá un modelo User nuevo y dentro le pasamos los parámetro en blaco tal que: "this.user = new User("","","",..., etc)"
+
+//Luego en el componente html de registro, empezamos la creación del formulario 
+
+
+---------/*Maquetación de página de registro*/---------
+
+//En el fichero styles, creamos un apartado de configuraciones generales y creamos una clase css .h1-strong con "font-size:35px;
+font-weight: bold;
+margin-left: 13px;
+margin bottom: 20px;
+padding-bottom: 15px;
+border-bottom: 1px solid #eee"
+
+---------/*Recibir datos del formulario*/---------
+
+//En la clase del coponente podemos crear un metodo onSubmit que muestre por consola el objeto user
+
+//En la etiquedat form dell html llamamos a la directiva de angular para llamar al metodo submit '(ngSubmit) = "onSubmit()"'
+
+//Comprobamos por consola
+
+---------/*Crear servicio de usuarios*/---------
+
+//Podemos generar un servicio desde npm con "ng g s nombreServicio"
+
+//Importamos los modulos HttpClient y HttpHeaders de @angular/common/http
+
+//Importamos la librería Observable de rxjs
+
+//Importamos el modelo User
+
+//Creamos una variable publica dentro de la clase del servicio que recoga la url del backend en tipo string
+
+//En la carpeta servicios, creamos un documento "global.ts" que va a contener la url de nuestro backend en una variable, tal que: "export var GLOBAL = {
+    url: 'http://localhost:3800/api/'
+}"
+
+//Importamos la clase global al servicio del user
+
+//En el constructor declaramos una variable publica _http y se le asigna el tipo HttpCliente
+
+//Dentro del constructor le damos un valor a la variable local url, es decir: "this.url = GLOBAL.url;"
+
+//Creamos un método register y dentro mostramos por consola el valor de this.url
+
+//En el componente registro importamos el servicio de usuario
+
+//En el decorador del coponente adjuntamos lo siguiente "providers: [UserService]" y dentro de parametros del constructor lo declaramos como variable privada: "private _userService: UserService"
+
+//En el método OnSubmit creado en el componente de registro, instanciamos el objeto del servicio y llamamos al método register y le pasamos el objeto user que se obtiene en el formulario de la clase: "this._userService.register(this.user);"
+
+
+//Asignamos el valor que viene de la clase global
+
+
+---------/*Registrar usuarios en la BD*/---------
+
+//Para poder registrar en la base de datos, debemos hacerlo desde el método register creado en el servicio
+
+//Para esto, debemos pasar como parámetro un objeto tipo User (haciendo referencia al modelo) y a la vez indicar que este parametro es de tipo Observable y a su vez, debemos indicar de que tipo es este Observable que se devuelve (para nuestro caso usaremos any, es recomendable cuando no se sabe con toda seguridad que objeto devuelve)
+
+//El objeto que nos llega por parámetro debe ser transformado a tipo string: "let json = JSON.stringify(user);"
+
+//Luego configuramos la cabecera, creamos una variable headers e instanciamos un nuevo objeto HttpHeaders, llamamos al metodo set y le pasamos los parámetros 'Content-type' y 'application/json' (esto hace que al enviar un json al backend lo procese y pasar los datos que contiene  un objeto js): "let headers = new HttpHeaders().set('Content-type', 'application/json')"
+
+//Luego hacemos la llamada al api tal que: "return this._http.post(this.url+'register', params, {headers: headers})" lo que hacemos aquí es llamar al servicio declarado en el constructor de tipo HttpClient y llamamos al metodo post para ingresar algo en la base de datos, como parametros pasamos la url concatenando al metodo register,. le pasamos los paramteros obtenidos en el body en la variable params y por ultimo le pasamos la cabecera como un objeto json (aquí se pasa la variable headers)
+
+//En el componente de registro, en el metodo onSubmit como el metodo register del servicio devuelve un observable, podemos suscribirnos y hacer una función de callback, así podemos recoger lo que nos devuelve el api, este suscribe tien como parametro un responde y un posible error 
+
+//Comprobamos que el callback devuelva un usuario, de ser así lo mostramos por consola y si no le decimos que nos muestre el error
+
+//El codigo nos quedaría de la siguiente manera: "onSubmit(){
+    this._userService.register(this.user).subscribe(
+      response => {
+        if(response.user && response.user._id){
+          console.log(response.user);
+        }
+      },
+      error => {
+        console.log(<any>error);
+      }
+    );
+  }"
+
+//En el componente de registro creamos una variable privada que contendrá el status de tipo string
+
+//Este estado lo pasaremos a través de un div, en el cual comprobaremos si está como succes o como error, de esto dependerá la clase con la que se muestre el div (la variable status representa una bandera, la cual nos hará cambiar el color del mensaje dependiendo sea el caso)
+
+//El código del div es el siguiente: "<div class="alert alert-success" *ngIf="status == 'success'">Registro compleatado correctamente, <a [routerLink]="['/login']">Identificate aquí</a>
+    </div>
+
+    <div class="alert alert-danger" *ngIf="status == 'error'">El registro no ha podido completarse, revisa si los datos ingresados son correctos e intentalo de nuevo
+    </div>
+" en caso de que el status sea success se manda un div de clase success y haciendo uso de [routerLink] pasamos como valor la ruta a login para que nos muestre un link que nos lleve al componente de loggeo , si el estado es error solo se mostrará un div con clase danger y se mostrará un mensaje de que no están bien ingresados los datoos
+
+
+// En la etiqueta form declaramos #registerForm="ngForm", estamos dandole un nombre al formulario con el uso del gato "#" y decimos que el formulario es de angular con la delcaración "ngForm"
+
+//Por lo tanto para vaciar los campos del formulario, pasamos el nombre del form, en este caso "#registerForm", lo pasamos al metodo llamado, que en este caso es onSubmit
+
+//En el componente de registro, debemos pasar al metodo onSubmit el formulario como parametro, para luego poder llmarlo dentro del metodo y poder hacer uso de la propiedad rest()
+
+//El código del OnSubmit quedaría tal que: " onSubmit(form){
+    this._userService.register(this.user).subscribe(
+      response => {
+        if(response.user && response.user._id){
+          this.status = 'succes';
+          form.reset();
+        } else {
+          this.status = 'error';
+        }
+      },
+      error => {
+        console.log(<any>error);
+      }
+    );
+  }"
+
+
+---------/*Formulario de login*/---------
+
+//Maquetamos el formulario en el login.component.html
+
+//En el login.component.ts importamos kas clases Router, ActivatedRoute y Params de @angular/router
+
+//Importamos el modelo User y también el servicio User
+
+//Cargamos el servicio en los providers del decorador del componente
+
+//Dentro de la clase del coponente creamos una variable user de tipo User referenciando al modelo
+
+//dentro de los parámetros del constructor declaramos las variables privadas _route de tipo ActivatedRoute, _router de tipo Router y _userService de tipo UserService
+
+//Dentro del constructor le asignamos un valor al objeto user, declarando una nueva instancia del modelo y pasando los parametros necesarios del mismo
+
+
+---------/*Identificar usuarios*/---------
+
+//Para que el api rest nos devuelve un resultado de si estamos identificados o no y de así serlo, que nos devuelva los datos del usuario loggeado, debemos modificar nuestro servicio y añadir un nuevo método
+
+//Creamos el método singUp con un parametro de tipo user y un parametro gettoken con null por defecto, este método debe devolver un Observable de tipo any
+
+//Cuando no le pasamos token, el metodo nos devolverá los datos del usuario, pero cuando le pasemos, nos devolverá el hash del usuario y comparará el token con los datos en cada petición realizada desde el frontend
+
+//Hacemos una comprobación de que si el token es diferente de null, de ser así decimos que la propiedad gettoken del objeto user será igual a lo que se le esté pasando por token
+
+//Creamos una variable params que nos transforme a tipo string el objeto user que se encuentra en formato json
+
+//Declaramos una variable header de tipo new HttpHeaders y seteamos cabeceras de 'Content-Type' y 'application/json'
+
+//Retornamos un método post del objeto _http, como parametros pasamos la url + el método del api rest, pasamos la variable params y un json con la propiedad headers indicando que se enviará la variable headers
+
+//En el component login, declaramos una variable publica status de tipo string, una variable public identity y otra llamada token
+
+//luego en el metodo onSubmit, hacemos una llamada al metodo del servicio, dentro del método pasmos como parametro el objeto usuario y nos sucribimos, este suscribe tiene un callback con un response y un posible error
+
+//En el response guardamos la propiedad user del objeto responde dentro de la propiedad creada identity
+
+//Luego comprobamos por if si identity es null o si la propiedad _id de identity es null, de ser así, pornemos la propiedad status como error, sino, por el else, ponemos el status como success(Este status servirá para mostrar un div en el html como mensaje de si se pudo loggear el usuario o no) y llamamos al método getToken()
+
+//En el callback de error creamos una variable erorMessage en el que guardamos <any>error
+
+//Luego comprobamos si el error es diferente de null, de ser así ponemos el status como error, el código quedaría de la siguiente manera: "  onSubmit(){
+    this._userService.singup(this.user).subscribe(
+      response => {
+        this.identity = response.user;
+        console.log(this.identity);
+        if(!this.identity || !this.identity._id){
+          this.status = 'error';
+        } else{
+          this.status = 'success';
+          this.getToken();
+        }
+      }, error => {
+        var errorMessage = <any>error
+
+        if(errorMessage != null){
+          this.status = 'error';
+        }
+      }
+    );
+  }"
+
+//Para crear el método getToken, podemos copiar el codigo del metodo onSubmit y al pasar los parametro en el metodo singup del servicio, pasamos el usuario y un string que diga 'true' para obtener el token
+
+//En el response, guardamos la propiedad token del response en la variable token
+
+//Luego comprobamos por if si token.lenght es <= 0, de ser así, pornemos la propiedad status como error, sino, por el else, ponemos el status como success 
+
+//En el callback de error creamos una variable erorMessage en el que guardamos <any>error
+
+//Luego comprobamos si el error es diferente de null, de ser así ponemos el status como error, quedando el código así: "  getToken(){
+    this._userService.singup(this.user, 'true').subscribe(
+      response => {
+        this.token = response.token;
+        console.log(this.token);
+        if(this.token.length <= 0){
+          this.status = 'error';
+        } else{
+          this.status = 'success';
+        }
+      }, error => {
+        var errorMessage = <any>error
+
+        if(errorMessage != null){
+          this.status = 'error';
+        }
+      }
+    );
+  }"
+
+
+---------/*Persistir sesiones de usuario*/---------
+
+//Para poder mantener la sesión de un usuario, haremos uso de la propiedad LocalStorage que es una memoria del navegador, en esta memoria podremos almacenar el token y los datos del usuario para cceder a la misma desde cualquier parte del api
+
+//En el componente de login dentro del método onSubit, una vez comprobado que si se ha recogido la identidad del usuario (en el else) llamamos al LocalStorage y le pasamos el metodo setItem, dentro pasamos como parámetro la propiedad 'identity', pero como LocalStorage no permite objetos de js, tendrmos que transformalo a un json string 
+
+//Dentro del método onSubit, una vez comprobado que si se ha recogido el token del usuario (en el else) llamamos al LocalStorage y le pasamos el metodo setItem, dentro pasamos como parámetro la propiedad 'token', pero como LocalStorage no permite objetos de js, tendrmos que transformalo a un json string 
+
+//En el servicio del usuario, declaramos dos propiedad públicas, una llamada identity y otra token, luego vamos a crear un metodo getIdentity que nos servirá para obtener los datos del usuario y el token y a la vez confirmar que se ha iniciado o no sesión
+
+//creamos una variable identity, en el cual transformaremos un string a formato json, obteniedo el item identinti con el metodo getItem dee LocalStorage
+
+//Comprobamos si identity es diferente de "undefined", de ser así decimos que identity será igual a lo que contenta la variable identity, si no identity será iguala null, por último retornamos la variable identity
+
+//El código quedaría tal que: "  getIdentity(){
+    let identity = JSON.parse(localStorage.getItem('identity'));
+
+    if(identity != undefined){
+      this.identity = identity;
+    }
+
+    return this.identity;
+
+  }
+"
+
+//Creamos un método getToken y creamos una variable token, en el cual transformaremos un string a formato json, obteniedo el item token con el metodo getItem dee LocalStorage
+
+//Comprobamos si token es diferente de "undefined", de ser así decimos que token será igual a lo que contenta la variable token, si no identity será iguala null, por último retornamos la variable token
+
+//El codigo quedaría de la siguente forma: " getToken(){
+    let token = JSON.parse(localStorage.getItem('token'));
+
+    if(token != undefined){
+      this.token = token;
+    }
+
+    return this.token;
+
+  }"
+
+//Importamos el servicio de usuario en el app.components y lo añadimos al array de providers(si no está providers, añadirlo también)
+
+//En el constructor creamos una propiedad privada _userService de tipo UserService
+
+//eEn la clase creamos una propiedad identity
+
+//en el ngOnInit llamamos a la priedad identity y le agregamos el valor que saquemod utilizando el metodo getIdentity del servicio
+
+//En el navbar del html podemos crear un *nfIg que indique que solo si identity existe, entonces nos muestre ese menú, si no existe, entonces mostraremos otro navbar
+
+//En la hoja de styles creamos una clase active con "background: #escogerColor" (esto se usará para mostrar cual es la pagina activa en el menú cuando no hay identity)
+
+//En la hoja de styles creamos una clase ".navigation .navbar a:hover" con "background: #escogerColor !important" (esto se usará para mostrar cuando se pase el mouse por algún elemento del navbar que es lo que se conoce como hover) Se pone el important porque se está sobreescribiendo estilos del bootstrap y por eso no los reconoce de forma inmediata
+
+//Para poder refrescar nuestra página y que nos muestre cambios al iniciar sesión vaos a utilizar el metod ngDoCheck, este metodo detectará cuando haya un cambio en la aplicación y podrá hacerle un refresh a la variable
+
+//Primero debemos añadir en el import de component, el metodo OnInit y DoCheck que viene de @angular/core y luego lo implementamos en la clase AppComponent 
+
+//Declaramos dentro del DocHekc que identity será igual al metodo getIdentity del servicio 
+
+
+---------/*Página home*/---------
+
+//Creamos una carpeta home dentro de components y luego creamos el componente home
+
+//Creamos una variable publica title de tipo string
+
+//Dentro del constructor podemos asignarle un valor
+
+//Configuramos el html con el title recibido del componente
+
+//Luego en el app.module importamos el nuevo componente y lo agregamos en el array de declarations
+
+//En el app.routing también hacemos la importacion del HomeComponent
+
+//Creamos una nueva ruta llamada home y configuramos la ruta vacía y home para que nos carguen el HomeComponent
+
+//Añadimos el link de ruta home al botón home del navbar mediante routerLink 
+
+
+---------/*Menú de usuario*/---------
+
+//En el app.component.html agregamos un ul  y los li necesario para desplegar el menu
+
+//El link de bootstrap en el head siempre debe ir después de los links de jquery, estos siempre van primero para que bootstrap pueda cargar todo lo que necesite de jquery
+
+
+---------/*Cerra sesión*/---------
+
+//En el component html llamamos a un evento (click) y le pasamos un metodo logout() que tendremos en el componente de la clase
+
+//En el app.component  creamos el metodo logout donde solo llamamos al localStorage y el metodo clear()
+
+//Seteamos el identity  a null
+
+//Importamos los componentes Router, ActivatedRoute y Params de @angular/router
+
+//Creamos en los parametros del constructor las variables _route de tipo ActivatedRoute y _router de tipo Router
+
+//En el metodo logout llamamos al objeto _router y le pasamos la propiedad navigate con parámetro ['/'] para que nos lleve a la página de iniciado
+
+//Dejamos configurada también la redirección al momento de loggearse, esto lo hacemos en el metodo getToken en el componente login una vez obtenido el token, de la misma manera llamamos al objeto _router de esa clase y hacemos uso del metodo navigate y le pasamos el parámetro ['/']
+
+
+---------/*Conseguir estadísticas*/---------
+
+//En el servicio del usuario creamos un metodo getCounters que recibira un userId con valor null por defecto y decimos que este metodo nos devuelve un observable de tipo any
+
+//Dentrocreamos una variable cabecera de tipo HttpHeaders y le seteamos un valor 'Content-Type' y ''application/json, luego llamamos a otro set y le pasamos la propiedad 'Authorization' y el metodo getToken
+
+//Comprobamos si userId es diferente de null, de ser así, hacemos un return llamando al http y hacemos un get, al cual le pasamos la url concatenada a 'counters/', le pasamos el userId y dentro de un objeto json le pasamos las cabeceras
+
+//En caso de que userId sea null, hacemos el mismo retorno pero sin pasar el userID, quedando el codigo así: "  getCounters(userId = null): Observable<any>{
+    let headers = new HttpHeaders().set('Content-Type', 'application/json').set('Authorization', this.getToken());
+
+    if(userId != null){
+      return this._http.get(this.url+'counters/'+userId, {headers: headers});
+    } else{
+      return this._http.get(this.url+'counters/', {headers: headers});
+    }
+
+  }"
+
+//Para no teneer que hacer siempre esta petición al api y poder acceder a estos datos una vez que se hayan consultados, podemos acceder a los mismo mediante la creación de un nuevo método getStats, en el cual declaramos una variable stats donde estarña guardado el item 'stats' que consigamos del localStorage, esto debe ser parseadoa json
+
+//Comprobamos si stats es diferente de undefined, de ser así decimos que la variable stats será igual a lo que contenga la misma, sino será igual a null
+
+//Hacemos un return de stats y el método quedaría así: "  getStats(){
+    let stats = JSON.parse(localStorage.getItem('stats'));
+
+    if(stats != "undefined"){
+      this.stats = stats;
+    } else{
+     this.stats = null;
+    }
+    return this.stats;
+  }"
+
+//Dentro del componente de login creamos un metodo llamado getCounter, dentro hacemos la llamada al servicio y luego al método getCounters, nos suscribimos y tendremos como respuesta un callback de response y otro de error, en el response llamamos al localStorage y le seteamos un item de nombre 'stats' que tendrá el valor de response pero transformado de json a string y colocamos el status como succes (eliminamos las puestas en succes de getToken y getidentity porque estos primero deben pasar por el getCounters)
+
+//Llamoamos a getCounters en el método getToken del componente de login y el _router.navigate lo podemos pasar al método getCounters
+
+//El código del método quedaría tal que: "  getCounters(){
+    this._userService.getCounters().subscribe(
+      response => {
+        
+        localStorage.setItem('stats', JSON.stringify(response));
+        this.status = 'success';
+        this._router.navigate(['/']);
+
+      }, error => {
+        console.log(<any>error);
+      }
+    )
+  }"
+
+
+---------/*Componentes y rutas mis datos*/---------
+
+//Creamos una nuevo componente user-edit dentro de la carpeta componente
+
+//En el componente importamos las clases Router, ActivatedRoute y Paramas de @angular/router
+
+//Importamos el modelo de usuario
+
+//Importamos el servicio de usuario 
+
+//En el decorador de componente añadimos el array providers y añadimos el servicio de usuario
+
+//En la clase de componente implementamos el OnInit
+
+//Declaramos las propiedades publicas, title de tipo string, user tipo User, identity, token, y status de tipo string
+
+//Dentro de los parametros del constructor declaramos las variables privadas _route de tipo ActivatedRoute, _router tipo Router y _userService de tipo UserService
+
+//Dentro del constructor le damos valor a las variables, title con valor "Actualizar mis datos"
+
+//Para user, llamamos al servicio de usuario y le pasamos el método getIdentity
+
+//Decimos que identity será igual a la variable user
+
+//Para el token también llamamos al servicio y le pasamos getToken
+
+//En el app module, comprobamos que se haya importado el componente, sino lo importamos y añadimos al array de declarations
+
+//Importamos el componente en el app.routing y declaramos una nueva ruta de path: 'mis-datos' que nos diriga al componente UserEdit
+
+//En el html del app.component, en el link de mis datos, ponemos un routerLink a la ruta del componente
+
+
+---------/*Formulario para actualizar datos de usuario*/---------
+
+//En el user-edit html creamos el formulario (para esto utilicé el mismo formulario del componente de registro editando las partes debidas, nombre de formulario, metodos, etc)
+
+//En el componente de user-edit agregamos el método onSubmit() y le pasamos por consola el objeto user
+
+---------/*Modificar el usuario*/---------
+
+//En el servicio añadimos un método updateUser() al que le pasamos como parametro un objeto user de tipo User y esto nos devuelve un Observable de tipo any
+
+//Declaramos una variable params que contendrá el objeto user pero transformado a string
+
+//Declaramos una variable header que será un nuevbo HttpHeaders, a esto le seteamos 'Content-Type' y 'application/json', luego le pasamos otro set con ''Authorization y el método getToken()
+
+//retornamos un objeto _http, llamamos al método put y le pasamos  la url +  'update-user/'+user._id también pasamos params y en un objeto json pasamos los headers
+
+//El método quedaría de la siguiente forma: "  updateUser(user: User): Observable<any>{
+
+    let params = JSON.stringify(user);
+    let headers = new HttpHeaders().set('Content-Type', 'application/json').set('Authorization', this.getToken());
+
+    return this._http.put(this.url+'update-user/'+user._id, params, {headers: headers});
+
+  }"
+
+//En el componente user-edit en el onSubmit hacemos la llamada al método updateUser mediante el servicio _userService, nos suscribimos y esto tiene dos callback, una response y un posible error
+
+//En el error creamos una variable errorMessage y guardarmos cualquier error, podemos también mostrar el mensaje por consola
+
+//Comprobamos si errorMessage es diferente de null y de ser así ponemos el status como error
+
+//En response comprobamos si !response.user y ponemos el status como error, pero si sí llega, ponemos status como succes y llamamos al localStorage y le seteamos el item identity pasando el objeto user transformado a string
+
+//Actualizamos el identity diciendo que es igual a user
+
+//El código de OnSubmit quedaría tal que: "  onSubmit(){
+    this._userService.updateUser(this.user).subscribe(
+      response => {
+        if(!response.user){
+          this.status = 'error';
+        } else{
+          this.status = 'success';
+          localStorage.setItem('identity', JSON.stringify(this.user));
+          this.identity = this.user;
+        }
+      }, error => {
+        let errorMessage = <any>error;
+        console.log(errorMessage);
+      }
+    )
+  }"
+
+
+---------/*Mejora del backend*/---------
+
+//En el controlador de usuario buscamos el método updateUser()
+
+//Antes de buscar y actualizar, llamamos al modelo y hacemos un find de si encuentra el email o nick(estas propiedades las sacamos del objeto update) ya utilizado en la base de datos, le damos exec y esto recibe un callback con un posible error y un objeto users 
+
+//Dentro del callback declaramos la variable user_isset = false y hacemos un forEach para users, donde comprobaremos si existe user y si user._is es diferente de userID, de ser así devolvemos user_isset como true
+
+//Fuera del callback comprobamos si existe user_isset y de ser así retornamos un mensaje de que los datos yas fueron usados
+
+//Luego, si no ha caído en las otras condiciones, hacemos el findByIdAndUpdate, le pasamos como parametro userId, el objeto update, un json para que nos muestre el objeto modificado y el callback con el posible error y el userUpdated
+
+//Si existe error, retornamos un mensaje de error
+
+//comprobamos si !userUpdated y retornamos mensaje de  no haber podido actualizar
+
+//Por último retornamos un objeto user con userUpdated
+
+//Sino pasamos el User.findByIdAndUpdate
+
+
+---------/*Campo de subida de foto de perfil*/---------
+
+//Editamos la vista html de user-edit, poniendo un input tipo file
+
+
+---------/*Servicio de subida de foto de perfil*/---------
+
+//Creamos un servicio upload en la carpeta services
+
+//importamos el fichero GLOBAL en el servicio
+
+//Dentro de la clase creamos una variable publica url de tipo string
+
+//Le agregamos el valor de global.url a la variable url dentro del constructor
+
+//Ahora crearemos un metodo que nos permitira subir imagenes y hacer una petición ajax clásica para subir archivos
+
+//Creamos el metodo makeFileRequest que recibe como parametro una rul de tipo string, paramas que será un array de tipo string, files que será un array de tipo File, token de tipo string y name que será también de tipo string
+
+//retornamos una nueva Promise para poder hacer uso de los then y recoger los datos que reciba
+
+//Dentro de la promesa se nos devuelve una función callback que recibe como parametros un resolve y un reject
+
+//Dentro del callbakc creamo una variable var formData de tipo any y le asignamos un valor new formData
+
+//Creamos una variable xhr que será un new XMLHttpReques(), que es un objeto que nos permite hacer peticiones ajax en Javascript puro
+
+//Hacemos un for para recorrer los objetos que nos lleguen al array de archivos y bindearlos a nuestra petición
+
+//En el for var i será igual a 0, mientras i sea menor a la longitud de file, se irá sumando uno  a identity
+
+//Dentro del for, decimos que formData.append() para añadir al formulario el nuevo fichero, pasando como parametros el nombre y el files[i] (archivo recorrido) y files[i].name (nombre del archivo)
+
+//Fuera del for llamaos al objeto xhr y su metodo onreadystatechange, esto será igual a una función donde, preguntamos si xhr.readyState es igual a 4, si es así preguntamos si xhr.status es igual a 200, de se así llamamos a resolve y el xhr.response lo pasamos a Json y lo ponemos dentro del resolve. En caso de que status no sea 200, pasamos en el elses reject y dentro el objeto xhr con propiedad response
+
+//Luego hacemos la petición Ajax, llamamos al objeto xhr y metodo open a este le pasamos como parametros 'POST', la url y un valor true
+
+//volvemos a llamar a xhr con metodo setRequestHeader, le pasamos 'Authorization' y token
+
+//Y hacemos xhr.send() pasandole el formData
+
+
+---------/*Subir avatares*/---------
+
+//En el componente user-edit importamos el servicio upload y el fichero GLOBAL
+
+//Añadimos el servicio al array de providers
+
+//En la clase creamos una propiedad publica url de tipo string
+
+//En parametros del constructor creamos una propiedad privada _uploadService
+
+//Dentro del scope del constructor decimos que this.url será igual a GLOBAL.url
+
+//En el user-edit html usaremos la propiedad (change) en la etiqueda del input de archivos, a esta propiedad le pasamos un metodo fileChangeEvent al cual le pasamos como parametro el evento $event
+
+//En el componete creamos el evento fileChangeEvent que recibe como parametro fileInput de tipo any, también creamos una propiedad publica filesToUpload que será de tipo Array<File>
+
+//Dentro del metodo, guardamos en la variable filesToUpload un array de tipo fichero <Array<File>> del fileInput al cual le pasamos la propiedad target y a esta la propiedad files
+
+//En el metodo OnSubmit después de que el status se haya puesto en success, llamamos al servicio upload y llamamos al metodo creado makeFileRequest al cual le pasamos como parametros, la url + 'upload-image-user/'+id de usuario, luego un array vacio, luego filesToUpload, después el token y por último el nombre que espera recibir el backend que sería 'image'
+
+//Para capturar la respuesta del servicio, llamamos la propiedad then que tendrá como callback un result:any, dentro de este callback decimos que user.image será igual a result.user.image y llamamos a localStorage y seteamos la propiedad identity y le pasamos el objeto usuario transformado a string
+
+//Para mostrar la imagen subida, nos vamos al html de user-edit y creamos un div con un *ngIf="user.image" y dentro le pasamos una etiqueta img con src= "{{ url + 'get-image-user' + user.image}}" get-image-user es el metodo del api para devolver la imagen
+
+
+---------/*Mostrar avatares*/---------
+
+//Importamos el fichero global en el app.component
+
+//Creamos una propiedad publica url de tipo string y en el scope del constructor le damos un valor donde this.url sera igual a GLOBAL.url
+
+//En el app.component html creamos una etiqueta img y le pasamos la url de la imagen + 'get'image'user/' + identity.image y esto lo mostramos en *ngIf si existe identity y si existe identity.image 
+
+//en styles podemos editar la clase .navigation .avatar y le damos los siguientes valores "width: 35px;
+height: 35px;
+border-radius: 100px;
+overflow: hidden;
+margin-top: 9px;
+margin-right: 2px;"
+
+//Tambiénd debemos darle estilos a la etiqueta imagen, decimos ".navigation .avatar img{
+    height: auto;
+    width: 35px;
+}"
+
+
+---------/*Sección gente*/---------
+
+//Creamos un nuevo componente en Components/users
+
+//En el nuevo componente importamos las clases necesarias de la librería router de angular
+
+//Importamos el modelo y el servicio de usuario y lo agregamos al array de providers
+
+//Importamos el fichero GLOBAL
+
+//Declaramos la propuiedad publica titel de tipo string, identity y token dentro de la clase
+
+//En los parametros del constructor declaramos las propiedades privadas, _route de tipo ActivatedRoute, _route de tipo Router, _userService de tipo UserService
+
+//Dentro del constructor damos valor a lasvariable, title podría llevar el string "Gente", en la propiedad identity guardamos lo que obtengamos de usar el servvicio y su metodo getIdentity, con la propiedad token hacemos lo mismo con el método getToken
+
+//En el app module importamos el componente UsersComponent y lo agregamos a declarations
+
+//Agregamos el componente también en app.routing y creamos la ruta con path 'gente'
+
+//También podemos agregar la ruta 404, pasandole al path '**' y le pedimos que nos cargue HomeComponent
+
+//En el app.component html podemos configurar en la etiqueta de gente el routerLink que nos redirija a esa página
+
+
+---------/*Servicios y usuarios paginados*/---------
+
+//En el user service crearemos dos metodos para que nos devuelva un usuario o una lista de usuarios paginados
+
+//Creamos el metodo getUsers, que recibe como parametro una variable page que por defecto será null y nos devuelve un observable de tipo any
+
+//definimos los headers, setenado 'Content-Type' y 'application/json' y en otro set pasamos 'Authorization' y pasamos el metodo getToken()
+
+//Luego retornamos el objeto _http por get y le pasamos como parámetro la url+'users/'+page y en objeto json los headers
+
+//Creamos el método getUser, que será igual que el anterior, pero en parámetro le pasamos id y en el return cambiamos la url+'user/'+id y pasamos los headers
+
+//Los dos métoso quedarían de la siguiente forma: "  getUsers(page = null): Observable<any>{
+
+    let headers = new HttpHeaders().set('Content-Type', 'application/json').set('Authorization', this.getToken());
+
+    return this._http.get(this.url + 'users/' + page, {headers: headers});
+
+  }
+
+  getUser(id): Observable<any>{
+
+    let headers = new HttpHeaders().set('Content-Type', 'application/json').set('Authorization', this.getToken());
+
+    return this._http.get(this.url + 'user/' + id, {headers: headers});
+
+  }"
+
+//En el componente de usuario crearemos un metodo actualPage que nos sacará la página actual
+
+//Primero editamos en el app.routing, la dirección que nos dirige a UsersComponent, agregando la pagina, tal que: "gente/:page"
+
+//Luego de vuelta en el componente en el metodo actualPage, llamamos al objeto _route y le pasamos la propiedad params, esto nos devuelve un observable, así que nos sucribimos y este suscribe nos devuelve una función de callback params, dentro del callback podemos crear una variable page, donde guardaremos params['page']; es decir, la página que nos devuelve el callback por medio de params, a esto le agregamos un más delante para convertirlo a entero
+
+//Creamos una propiedad publica page y en el metodo guardamos dentro de esta propiedad lo que nos devuelve el callback 
+
+//Creamos también dos propiedades next_page y prev_page
+
+//Comprobamos si no existe pagina, de ser así será igual a uno, pero si si existe decimos que nex_page será igual a page+1, prev_page será igual a page-1
+
+//Preguntamos si prev_page es menor o igual a 0, de ser así decimos que prev_page será igual a 1
+
+//En el scope principal del método, llamamosal método getUsers y le pasamos la página
+
+//El método quedaría con el siguiente código: "  actualPage(){
+    this._route.params.subscribe(params => {
+      
+      let page = +params['page'];
+      this.page = page;
+
+      if(!page){
+        page = 1;
+      } else{
+        this.next_page = page + 1;
+        this.prev_page = page - 1;
+
+        if(this.prev_page <= 0){
+          this.prev_page = 1;
+        }
+      }
+
+      this.getUsers(page);
+
+    });
+  }"
+
+//Creamos en el componente una propiedad publica status de tipo string, total, pages, users de tipo Users[] (array de objetos de usuario)  y un método llamado getUsers que recibe como parametro la page a cargar
+
+//Dentro llamamos al servicio y usamos el metodo getUsers, pasandole page, a estos nos suscribimos y nos devuelve callback con response o posible error
+
+//Si da error podemos crear una variable errorMessage que contendrá any error, luego comprobamos si errorMessage es diferente de null, de ser así seteamos status como error
+
+//En response comprobamos si response.user no existe, de ser así, seteamos s4tatus como error, sino seteamos e¡que total será igual a response.total, pages será igual a response.pages, users igual a response.users
+
+//Comprobamos si page es mayor a pages y de ser así, llamamos al objeto _router y le hacemos un navigate a "['/']"
+
+//El método quedaría tal que: "  getUsers(page){
+
+    this._userService.getUsers(page).subscribe( response => {
+   
+      if(!response.users){
+        this.status = 'error';
+      } else{
+
+        this.total = response.total;
+        this.pages = response.pages;
+        this.users = response.users;
+  
+        if(page > this.page){
+          this._router.navigate(['/']);
+        }
+
+      }
+      
+    }, error => {
+      var errorMessage = <any>error;
+
+      if(errorMessage != null){
+        this.status = 'error';
+      }
+
+    });
+
+  }"
+
+//Creamos una nueva ruta 'gente' pero sin que reciba parámetros
+
+//En el ngOnInit llamamos a actualPage()
+
+
+---------/*Listado de usuarios*/---------
+
+//En el html de users, creamos un div de clase "people"
+
+//Dentro creamos un div con un *ngFor diciendo que "let user of users" diciendo que recorra el objeto user y cada iteración llevará el nombre de la variable user la clase de este div será item-user
+
+//Seguimos maquetando la vista
+
+
+---------/*Botones de seguimiento*/---------
+
+//En el componente user, creamos dentro de la clase una propiedad follows donde guardaremos los usuarios a los que sigue el usuario loggeado
+
+//En la parte del método getUsers, donde obtenemos el response de la petición, guardamos el response.users_following dentro de la variable follows
+
+//Para mostrar los botones, nos vamos a agregar botones en la vista del componente users
+
+//Para asegurar que se nos muestre los botones que realmente necesitamos según el usuario hacemos uso del ngIf, pasandole una condición validada por el método indexOf a la que le pasamos por parámetro el user._id comprobando si es menor que 0, esto quiere decir (para el botón follow) que se comprobará si ese usuario consta en la lista de follow, si esto es menor que 0 entonces no lo hemos seguido aún y nos aparecerá este botón
+
+//Para el botón edjar de seguir la sentencia es la misma cambiando el operador < por un >= 
+
+//En el botón de unfollow usaremos los eventos (mouseenter) que llamará un metodo del componente llamado mouseEnteer() y también el evento mouseleave que llamará al evento que crearemos también en el componente mouseLeave, a estos dos métodos le pasaremos como parámetro el user._id
+
+//En el componente creamos una propiedad publica followUserOver
+
+//Creamos el método mouseEnter(user_id) con parametro user_id y dentro decimos que la propiedad followUserOver es igual a user_id
+
+//Creamos el método mouseLeave(user_id) con parametro user_id y dentro decimos que la propiedad followUserOver es igual a 0
+
+//En el span del botón para dejar de seguir, hacemos un ngIf donde preguntamos si user._id es igual a followUserOver, de ser así vemos el botón para dejar de seguir, sino cargamos una plantilla following
+
+//Para esto debemos sustituir la etiqueta de span del botón de "siguiendo" por la etiqueta "ng-template" para anunciar que le pasaremos una plantilla de angular de nombre "#following"
+
+//Dentro de la etiqueta del boton podemos definir una condición para que nos cambie la clase mostrada del botón, ponemos "[class.btn-danger]="user._id == followUserOVer""
+
+
+---------/*Servicio de follows*/---------
+
+//En la carpeta servicio creamos un nuevo servicio llamado follow
+
+//Importamos HttpClient, HttpHeaders, la librería Observable, el fichero GLOBAL y el modelo Follow
+
+
+//Definimos en la clase la propiedad url de tipo string
+
+//En los parametros del constructor declaramos una variable privada _http de tipo HttpClient
+
+/9Dentro del constructor le damos valor a la propiedad url, le asignamos el valor de GLOBAL.url
+
+//Creamos el metodo addFollow que recibe como parámetro el token de usuario y el follow, esto nos devuelve un observable de tipo any
+
+//dentro creamos una variable params que contendrá el parametro follow transformado a string
+
+//creamos una variable headers de un nuevo tipo HttpHeaders, al que le seteamos un parametro 'Content-Type' y 'application/json' y luego seteamos 'Authorization' y el token
+
+//retornamos un objeto _http por post, pasando como parametro url + 'follow', params, y en un json los headers
+
+//Creamos el metodo deleteFollow que recibe como parámetro el token de usuario y el id, esto nos devuelve un observable de tipo any
+
+//creamos una variable headers de un nuevo tipo HttpHeaders, al que le seteamos un parametro 'Content-Type' y 'application/json' y luego seteamos 'Authorization' y el token
+
+//retornamos un objeto _http por delete, pasando como parametro url + 'follow/'+id  y en un json los headers
+
+
+---------/*Botón de seguir*/---------
+
+//En el componente users importamos el servicio de follow y lo agregamos al array de providers, luego lo agregamos como propiedad privada dentro de los parámetros del constructor
+
+//Importamos también el modelo de follow
+
+//Creamos un método llamado followUser pasando el parametro followed que contendrá el id del usuario seguido
+
+//Creamos una variable follow que contendrá un nuevo objeto de tipo Follow y como parametro le pasamos el primero vacío que corresponde al id del objeto, el segundo le pasamos identity._id que es el id del usuario loggeado y tercero el id del usuario a seguir como followed
+
+//Llamamos al servicio de follow y llamamos al método addFollow al cual le pasamos el token y el objeto follow como parametros, como respuesta, nos suscribimos a este metodo que nos devuelve un callback de response y uno de error
+
+//En el error podemos crear una variable de error que sea igual a <any>error, luego comprobamos si esta variable es diferente de null, de ser así, ponemos el status en error
+
+//En el response, comprobamos que !response.follow y de ser así ponemos status como error, de lo contrario ponemos status como succes y el id que pasamos como parametro llamado followed, lo añadimos al array de follows diciendo follows.push(followed)
+
+//En la plantilla html de users, en el botón de seguir, llamamos al evento (click) y llamamos al método followUser, pasando como parametro user._id
+
+//Para corregir que en la lista de usuarios no aparezcan botones en el usuario con el cual estamos loggeados, en el div que contiene todos los botones de los usuario hacemos un *ngIf="user._id != identity._id" donde comprobamos que el id de usuario mostrado sea diferente del id de usuario loggeado
+
+
+---------/*Dejar de seguir*/---------
+
+//En el componente de usuario creamos un metodo unfollowUser que recibe como parametro el id del usuario a dejar de seguir como followed
+
+//Llamamos al servicio y llamamos al metododeleteFollow al que le pasamos el token y el followed,  nos suscribimos y tendremos un callback de response y otro de error
+
+//En el error podemos crear una variable de error que sea igual a <any>error, luego comprobamos si esta variable es diferente de null, de ser así, ponemos el status en error
+
+//En el response creamos una variable search que será igual a follows.indexOf(followed), es decir, vamos a buscar dentro del array de follows, la posición en la que se encuentra el usuario followed
+
+//Comprobaremos si la variable search es igual a -1 (ya que al realizarse una búsqueda por index si no se encuentra, siempre devuelve -1)
+
+//Si search es diferente de -1, utilizamos la función splice en el array follows, pasando como parametro la variable search y 1 para indicar que solo elimine un item apartir del dato search
+
+//En la plantilla html de users, llamamos al evento (click) y llamamos al método unfollowUser pasando el parametro user._id 
+
+
+---------/*Empezando el sidebar/---------
+
+//Creamos un nuevo componente sidebar dentro de component
+
+//Este componente no será utilizado como los otros, creando routing con la clase router, solo se utilizará como web component
+
+//Importamos el servicio de usuario y el fichero GLOBAL
+
+//Añadimos el servicio al array providers del decorador Component
+
+//Dentro de la clase definimos las propiedads publicas, identity, token, stats, url y status
+
+//XDentro del constructor le inyectamos el servicio de usuario
+
+//Dentro del constructor le damos valor a las propiedades creadas, donde identity es igual al metodo getIdentity del servicio, token es igual metodo getToken del servicio de usuario, stats será igual al metodo getStats del servicio, la url será igual a GLOBAL.url
+
+//EMpezamos el maquetado dentro de la plantilla
+
+
+---------/*Maquetación de tarjeta de usuario*/---------
+
+//Hacemos uso de estilos y bootstrap para definir la ubicación y estilos de diseño de los componentes
+
+
+---------/*Crear formulario de publicaciones*/---------
+
+//En el component sidebar importamos el modelo de publicaciones
+
+//Creamos una propiedad publication de tipo Publication
+
+//Dentro del constructor le damos a esa propiedad un nuevo objeto de tipo Publication y le pasamos los datos en blanco como parametro
+
+//Definimos el método onSubmit que luego utilizaremos
+
+//En el sidebar html, al final agregamos un nuevo div y empezamos la Maquetación
+
+
+---------/*Sección del Timeline*/---------
+
+//Creamos un nuevo componente de angular, llamado timeline dentro de Components
+
+//Importamos los componentes Router, ActivatedRoute y Params de @angular/router
+
+//Importamos el modelo Publication y el fichero GLOBAL
+
+//Importamos el servicio de usuario y añadimos en el array de providers
+
+//Creamos las propiedades publicas identity, token, title de tipo string y url de tipo string
+
+//En los parametros del contructor creamos las variables _route de tipo ActivatedRoute, _router de tipo Router y _userService de tipo User
+
+//Dentro del constructor asignamos valores a las propiedades, donde identity será igual a el metodo getIdentity del servicio usuario, token igual al metodo getToken del mismo servicio, asignamos un valor a title y le pasamos a url el valor de la variable url de GLOBAL
+
+//Maquetamos la plantilla y adjuntamos el componente sidebar
+
+//En el app routing importamos el componente Timeline y agregamos una nueva ruta que nos redirija a este componente con el path: "timeline"
+
+//Cambiamos en el app.component html el enlace de Timeline para que nos redirija a nuestro componente timeline con un routerLink que nos lleve a ['/timeline']
+
+---------/*Crear publicaciones*/---------
+
+//Creamos un nuevo servicio dentro de Service llamado publication 
+
+//Importamos los componentes HttpClient y HttpHeaders de '@angular/common/http'
+
+//Importamos la libreria Observable, el fichero GLOBAL y el modelo Publication
+
+//Creamos una propiedad publica url de tipo string
+
+//En los parametros del constructor definimo _http de tipo HttpCliente
+
+//Dentro del constructor le damos valor a url, asignando el valor del url del fichero GLOBAL
+
+//Creamos el método addPublication, pasandole como parametros el token y la publicación y devolviendo un objeto Observable de tipo any
+
+//Dentro del metodo creamos una variable params y le asignamos el valor de la publicacion transformado a string
+
+//Declaramos la variable headers y le asignamos el valor de un nuevo HttpHeaders y le seteamos la cabecera de Content-Type y de authorization con el token
+
+//retornamos un objeto http que llama al método post, al cual le pasamos como parámetros la url + 'publication', le pasamos params y el objeto json de los headers 
+
+//En nuestro componente Sidebar creamos una propiedad status importamos el servicio de Publication y lo añadimos al array de providers, también le creamos una propiedad _publicationservice de tipo PublicationService dentro de parametros del constructor
+
+//Dentro del método onSubmit, llamamos al servicio de publicación y a su metodo addPublication, le pasamos como parametros el token y publication, nos suscribimos y esto nos retorna un callback de response y otro de error
+
+//Si hay error creamos una variable errorMessage de tipo any error, luego comprobamos si esta variable es diferente de null, de ser así, ponemos status como error
+
+//En el response comprobamos si existe response.publication, y a status loponemos como success, si no existe ponemos status como error
+
+//En la plantilla de sidebar, en la llamada al metodo onSubmit, le pasaremos como parametro newPubForm que es el nombre del formulario para poder limpiar sus campos
+
+//En el componente ya en el metodo onSubmit, le agregamos un parametro form recibir y en la parte de status success, llamamos a ese parametro y le hacemos reset()
+
+//En la plantilla de sidebar, ponemos unos divs de mensajes que se mostrarán según el status
+
+---------/*Nuevos métodos en los servicios*/---------
+
+//En el servicio de Publications añadimos el metodo getPublication al que le pasamos un token y la pagina que por default será 1, esto nos devolverá un objeto Observable de tipo any; esté metodo hara que el backend nos devuelva un listado de publicaciones solo de los usuarios que nosotros seguimos 
+
+//Dentro del metodo creamos una variable headers que contenga lo mismo que el metodo anterior
+
+//Por return hacemos una petición al objeto _http por get le pasamos la url+'publications'+page y los headers
+
+//Creamos también deletePublication al que le pasamos un token y un id de la publicación a eliminar, esto nos devuelve un observable de tipo any
+
+//Creamos una variable headers que contenga lo mismo que el metodo anterior
+
+//Retornamos una petición del objeto _http por metodo delete, le pasamos la url+'publication/'+id y los headers
+
+
+---------/*Mostrar publicaciones*/---------
+
+//En el componente timeline creamos una propiedad publica status de tipo string, publications que será un array de objetos Publication, total, pages y otra llamada page, importamos el servicio de publicaciones y añadimos al array de providers y lo añadimos en los parametros del constructor como propiedad privada
+
+//Dentro del constructor le asignamos a page el valor 1
+
+//Creamos un método llamado getPublications que recibe como parametro una pagina
+
+//Llamamos al servicio de publicaciones y al metodo getPublications que recibirá el token y la pagina, nos suscribimos y esto nos devuelve un callback de response y otro de error
+
+//Si hay error creamos una variable errorMessage de tipo any error, luego comprobamos si esta variable es diferente de null, de ser así, ponemos status como error
+
+//En el response, comprobamos si existe response.publications, de ser así, guardamos este response.publications dentro de la variable publications, guardamos en total lo que este en response.total_items, y en pages lo que este en response.pages
+
+//Comprobamos si page es mayor que pages, de ser así ponemos una redirección al home
+
+//De no ser así, ponemos estatus como error
+
+//En el onInit llamamos a nuestro metodo getPublication y le pasamos la variable page
+
+//En la plantilla de timeline hacemos un *ngFor tal que let publication of publications para que recorra el arreglo
+
+
+---------/*Mostrar más publicaciones - Scroll Infinito*/---------
+
+//En la plantilla del timeline agregamos un nuevo boton
+
+//En el componente timeline Para poder añadir objetos al array de publicaciones del metodo getPublications le agregamos un parametro adding que por defecto reciba false
+
+//Dentro del success del método decimos que si no existe adding response.publications se guardara en publications, de ser true creamos una variabale arrayA que será igual a la variable publications y otra que será arrayB la cual contendrá response.publications
+
+//Luego decimos que publications será igual a arrayA.concat(arrayB)
+
+//En el controlador de publication en el api, en el método getPublications, al momento de retornar los elementos que se deben mostrar, añadimos que se muestre itemsPerPage
+
+//En el componente Timeline, creamos una propiedad itemsPerPage y al recibir respuesta en getPublications, le pasamos lo que recibe el objeto, también creamos una propiedad noMore que por defecto sea false
+
+//Creamos un metodo viewMore y dentro preguntamos si publications.length sea igual al total, de ser así seteamos noMore como true, de lo contrario decimos que page+=1 
+
+//Luego llamamos al metodo getPublications y le pasamos en parametros page y un valor true 
+
+//En el botoón de la plantilla de timeline usamos el evento click para pasar el metodo viewMore
+
+//Dentro del botón hacemos un *ngIf con !noMore para que solo se muestre cuando noMore sea falso
+
+
+---------/*Scroll automático animado*/---------
+
+//Para esto debemos utilizar jquery 
+
+//en el método getPublications hacemos uso de los selectores html y body de la siguiente manera $("html, body")le pasamos la propiedad animate y como parametros dentro de ella le pasamos un objeto json que contenga { scrollTop: $('body').prop("scrollHeight")} es decir le pasamos el tamaño del body para que le haga un scroll a esa propiedad del selector body, como segundo parametro le pasamos el tiempo que durará la animación (que por defecto se pone en milisegundos) /////*Esto me tira error, hice una pregunta de como solucionarlo, toca esperar*/////
+
+
+---------/*Mostrar publicaciones del usuario*/---------
+
+//En el controlador de publication en el api, en el metodo getPublications, después de hacer el forEach al array follows, hacemos un push a follows_clean y le pasamos el id del usuario loggeado: follows_clean.push(req.user.sub);
+
+
+---------/*Mostrar fecha de publicaciones*/---------
+
+//Cerramos la ejecución de los servidores
+
+//Instalamos en angular la dependencia angular-moment con npm
+
+//Importamos en el app module el componente MomentModule y lo pasamos en los imports 
+
+//En la plantilla html del timeline, podemos poner en un div de clase date por medio del doble binding {{publication.created_at}}
+
+//A esto le podemos pasar un pipe de angular-moment que se llama amTimeAgo que corresponde al tiempo desde que se publicó, pero como la fecha del objeto viene dada en timestamp, debemos convertirla a un formato date, para que el pipe amTimeAgo pueda leerla
+
+//Esto lo hacemos pasando el publication.date por otra pipe llamada amFromUnix, quedando el binding de la siguiente forma {{(publication.date | amFromUnix) | amTimeAgo}}
+
+//Por defecto la fecha saldrá en inglés, así que si queremos que salga en español, deberemos pasarle otro pipe para cambiar el idioma, el pipe sería "amLocale: 'es'"
+
+
+---------/*Recargar publicaciones - Propiedad Output*/---------
+
+//Ya que el timeline es un componente independiente del sidebar donde se realizan las publicaciones, lo que haremos es generar un router.navigate a la url de timeline para recargar 
+
+//En el componente de sidebar importamos Router, ActivatedRoute y Params
+
+//Inyectamos los objetos que acabamos de importar en los parametros del constructor
+
+//En el metodo onSubmit, cuando el estado queda en success, llamamos a _router.navigate y lo redireccionamos a ['/timeline']
+
+//También vamos a separar el listado de publicaciones del componente timeline, para poder pasar información de un componente a otro
+
+//Dentro de components creamos un nuevo componente llamado publications
+
+//En el componente sidebar, al lado de la importación de OnIniti, importamos EvenEmitter, Input y Output
+
+//Creamos una propiedad dentro de la clase, usando el decorador @Output, el cual tendrán un objeto sended que será una nueva instancia del objeto EventEmitter
+
+//Creamos un método llamado sendPublication que recibe como parametro una variable event
+
+//Llamamos al objeto sended y dentro llamamos a su propiedad emit, a la cual le pasamos como parametro un objeto json donde send: 'true'
+
+//Dentro de la plantilla de sidebar, en el evento ngSubmit, le señalamos que también debe ejecturar sendPublication($event) pasando como parametro el evento
+
+//En la plantilla de timeline, en la etiqueta que llama al componente sidebar, podemos llamar al evento sended y decimos que cuando este ocurra, se llamará al método refresh pasandole como parametro $event
+
+
+//No es necesario sacar el contenido de las plantillas del componente timeline, así que se vuelve a dejar como estaba 
+
+//En el componente de timeline, creamos el evento refresh, pasando como parametro event
+
+//Hacemos que dentro de este metodo se ejecute el método getPublications, pasando como parametro el numero para que siempre nos cargue la nueva publicación al primero 
+
+
+---------/*Crear componente, ruta y pagina de perfil de usuario*/---------
+
+//Dentro de components, creamos un nuevo componente llamado profile
+
+//Imporamos los componentes de router, los modelos de usuario y de follow, y los servicios de usuario y de follows y fichero GLOBAL
+
+//Definimos dentro de la clase las propiedades title, de tipo string, user de tipo User, una propiedad status de tipo string, identity, token, url, stats y follow
+
+//Dentro de los parametros del constructor inyectos las propiedades para llamar a los servicios, _route, _router, _userService y _followService
+
+//Dentro asignamos valores a las variables, donde identity será igual _userService.getIdentity, token = _userService.getToken y url igual a GLOBAL.url
+
+//Definimos lo que se mostrará en la plantilla
+
+//Creamos la ruta en el app.routing, primero importamos el componente y luego creamos una nueva ruta con path: 'perfil/:id' que nos llevará al ProfileComponent
+
+
+---------/*Conseguir datos de usuario*/---------
+
+//En el componente profile, creammos un metodo getUser que recibe como parametro un id
+
+//Dentro llamamos al servicio y al metodo del servicio getUser, le pasamos el id y nos suscribimos
+
+//Tendremos un callback de response y otro de error, si es error, mostramos el error por consola, ponemos status como error y llamamos al objeto router.navigate para redirigir a (['/perfil', this.identity._id]), pero en el response comprobamos si, response.user, de ser así, guardamos lo obtenido en response.user dentro de la propiedad user y ponemos status como success, sino ponemos status como error
+
+//Luego creamos otro metodo loadPage, dentro llamamos al objeto _route.params y nos suscribimos, esto nos devuelve un callback con params y dentro creamos una variable id, que recoge lo que haya en el índice ['id'] de params, luego llamamos al metodo getUser y le pasamos la variable id
+
+//El metodo loadPage lo cargamos en el onInit
+
+//creammos un metodo getCounters que recibe como parametro un id
+
+//Dentro llamamos al servicio y al metodo del servicio getCounters, le pasamos el id y nos suscribimos
+
+//Tendremos un callback de response y otro de error, si es error, mostramos el error por consola, ponemos status como error, y en el response guardamos el objeto response dentro de la propiedad stats
+
+//Llamamos al metodo getCounters en el metodo loadPage
+
+---------/*Botones de seguir/---------
+
+//En el html del componente user, activamos por medio de routerLink los nombres de los usuarios para que estos nos puedan redirigir a su perfil
+
+//Para poder mostrar los botones de seguimiento, dependiendo si un usuario nos sigue o no, nos vamos al componente profile
+
+//Creamos la propiedad followed y otra following y luego las inicamos ambas en falso
+
+//En la respuesta el metodo getUser comprobamos si response.following && response.following._id entonces decimos que following será true, sino, decimos que es falso, con esto sabremos si seguimos a este usuario
+
+//Luego comporbamos si response.followed && response.followed._id, de ser así decimos que followed será true, sino será falso, con esto sabremos si el otro usuario nos sigue
+
+//En la plantilla del html dentro de un div  configuramos un label que muestre si el usuario nos sigue y un botón para seguir o dejar de seguir según sea el caso
+
+//Dentro del componente profile creamos un metodo followUser y le pasamos como parametro followed
+
+//Dentro creamos una variable follow que corresponde a una nueva instancia del modelo Follow, le pasamos como parametros, el primero vacío, el segundo el identity._id y el tercero followed 
+
+//Luego llamamos al servicio de follow y al metodo addFollow, al cual le pasamos como parametro el token y el objeto follow, nos suscribimos y tendremos un callback de respuesta y otro de error
+
+//En el de error solo haremos un console de <any>error
+
+//En el response, ponemos que following será igual a true
+
+//Creamos un metodo unfollowUser y le pasamos como parametro followed
+
+//Dentro llamamos al servicio de follow y al metodo deleteFollow, le pasamos el token y el objeto followed recibido, nos suscribimos y tendremos un callback de respuesta y otro de error
+
+//En el callback de respuesta seteamos following como false y en el de error mostramos por consola <any>error
+
+//En el html, pasamos los metodos creados en los botones correspondientes
+
+
+---------/*Botones de seguir/---------
+
+//En el componente profile creamos una propiedad followUserOver 
+
+//Creamos un metodo mouseEnter que recibe un parametro user_id
+
+//a la propiedad followUserOVer le asignamos el valor user_id
+
+//Creamos un metodo mouseLeave y dentro le asignamos a followUserOVer el valor 0
+
+//En la plantilla de profile en el boton Deja de seguir, llamamos al evento mouseenter y le pasamos el metodo mouseEnter() pasando como parametro el id, luego llamamos también al evento mouseleave y le pasamos el metodo mouseLeave(), también definimo que cuando user._id sea igual a followUserOVer, cambie la clase a btn-danger
+
+//Luego ponemos el dejar de seguir dentro de un span al que le pasamos un ngIf comprobando si user._id es igual a followUserOver, sino le pasamos una plantilla de nombre following
+
+//Debajo definimos el ng-template de nombre following
+
+
+---------/*Mostrar publicaciones de usuarios*/---------
+
+//En el api, en el controlador de publicaciones, creamos un metodo getPublicationUser (se puede copiar del metodo getPublications y cambiar los detalles necesarios)
+
+//Eliminamos la consulta que hace con el modelo Follow, creamos una variable user que por defecto será req.user.sub
+
+//Comprobamos si nos llega un id de usuario por url, es decir req.params.user, de ser así, decimos que la variable user será igual a req.params.user
+
+//En las rutas de publication del api, agregamos la nueva ruta estableciendo '/publications-user/:user/:page?'
+
+//En el servicio de angular, creamos un servicio getPublicationUser, que puede ser igual a getPublications, pero le cambiamos la ruta, por la que configuramos en el api, luego le pasamos el user_id y luego la pagina
+
+//En el component publication utilizamos el metodo getPublicationUser en el servicio
+
+//Importamos junto a OnInit, el component Input 
+
+//Creamos una propiedad @Input() de nombre user y tipo string
+
+//Para poder obtener lo que se pasa en este input, llamamos al componente publication dentro de la plantilla del componente profile y le pasamos entre corchetes el nombre de la propiedad a recibir, en este caso [user] que recibirá user._id (esto debemos ponerlo dentro de un div y con ngIf comprobar si el objeto user existe, sino nos botara error)
+
+
+---------/*Mejoras en la paginación*/---------
+
+//En el metodo noMore de publications y timeline,  primero incrementamos en uno la variable page, luego comprobamos si page es igual a pages, de ser así, decimos que la variable noMore es true, luego llamamos a getPublications y le pasamos la pagina y true 
+
+
+---------/*Adjuntar imágenes en las publicaciones*/---------
+
+//En el componente sidebar, importamos el servicio Upload y lo cragamos en los providers, para luego crear la propiedad privada _uploadService dentro de los parametros del constructor
+
+//Creamos una propiedad filesToUpload que será un array de tipo File
+
+//Creamos un metodo fileChangeEvent que recibirá un parametro fileInput de tipo any
+
+//Dentro decimos que filesToUpload será igual a <Array<File>>fileInput.target.files, es decir, vamnos a guardar los ficheros seleccionados por input que crearemos en la plantilla
+
+//En la plantilla de sidebar, en el inpur de subir imagen, llamamos al evento (change) y dentro llamamos al metodo fileChangeEvent, pasandole como parametro el evento
+
+//En el metodo onSubmit, en la parte de response cuando se pone status en succes, llamamos al servicio upload y a su metodo makeFileRequest, le pasamos como parametro la url + la ruta 'upload-image-pub/' + la publicacion con la que se esta subiendo que es response.publication._id, luego le pasamos un array vacío, la propiedad filesToUpload, luego le pasamos el token y por último el nombre del fichero que debe recoger el backend que en este caso es 'image'
+
+//Luego llamamos al metodo then de la promesa y dentro tendremos una función de callback resul de tipo any, dentro decimos que publication.file será igual resul.image y debemos de poner dentro de este result el navigate, el cambio de status y el rest del form
+
+
+---------/*Mostrar imágenes en las publicaciones*/---------
+
+//En un div  en la plantilla de timaline, ubicamos dos botones, indicando que se muestren si existe el publication.file, de ser así, se mostrará el primero, siempre que la propiedad que creamos showImage sea diferente del id de publicación, el otro botón se mostrará cuando esta variable sea igual al id de publicación
+
+//En el componente creamos un metod showThisImage, el cual recibe un id, dentro decimos que showImage será igual al id
+
+//Creamos un metod hideThisImage, el cual recibe un id, dentro decimos que showImage será igual a 0
+
+//En ambos botones llamamos al evento click y llamamos a los metodos según corresponda, pasandole el parametro publication._id 
+
+
+---------/*Eliminar publicaciones*/---------
+
+//Maquetamos el botón dentro de la plantilla de timeline
+
+//Luego utilizamos una plantilla de modal para configurar el pop-up que aparece´ra al querer borrar la publicación
+
+//Para que el modal pueda leer los diferentes datos de cada publicación, en el id, debemos concatenar {{publication_routes._id}}
+
+//De esta manera podríamos mostrar el texto de la publicación en el pop-up
+
+//En el botón de eliminar, llamamos al evento click que será igual al metodo que crearemos en el componente llamamdo deletePublication al cual le pasamos el publication._id
+
+//En el componente de timeline creamos un metodo deletePublication que recibe un token y un id de publicación, aquí llamamos al objeto del servicio y a su metodo deletePublication, el cual recibe como parametro el token y el id de la publicación
+
+//Usando el metodo suscribe, recibimos dos respuestas de callback, uno de error y otro de respuesta
+
+//En el callback de error, mostramos el error por consola
+
+//En el response, de todo ser correcto, hacemos un refresh general, para que esto funcione, al metodo refresh previamente creado, le pasamos como parametro un event que será igual a null
+
+//Para que esto funcione, debemos cambiar la validación del metodo onSubmit del componente sidebar, en el que primero debemos preguntar si filesToUpload existe y si tiene algún archivo, entonces se ejecuta la carga de imagen con todo lo que conlleve
+
+//De no ser así, entonces solo le pasamos el status, el form.reset y el navigate
+
+
+---------/*Listado de usuarios seguidos y seguidores/*/---------
+
+//Creamos dentro de Component un componente llamado following
+
+//En following importamos los componentes de Router, los modelos follow y user, y también los seervicio de usuer y follow con el fichero global
+
+//Podemos copiar los metodos y propiedades del componente users
+
+//Debemos cambiar el metodo getUsers, por getFollows que recibirá un id de usuario y el numero de la pagina
+
+//Creamos una propiedad publica followings
+
+//En el metodo actualPage, cambiamos la llamada al metodo getUsers y le pasamos el user_id también que es un parametro que recogeremos por url 
+
+//En el mismo actualPage creamos una variable que reciba por params el ['id']
+
+//continuando en getFollows, cambiamos el servicio por el de follow y ocupamos el metodo getFollowing , al cual le psamos el token, el user_id y la página, nos suscribimos y tendremos un callback de respuest y otro de error
+
+//En el callback de error mostramos un mensaje por consola
+
+//En el callback de respuesta, preguntamos si no existe !response.follows, de ser así, decimos que status es igual a error, sino decimos que total = response.total_items, following = response.follows, pages = response.pages y follows = response.following
+
+//Creamos una propiedad userPageId y en el metodo actualPage decimos que userPageId es igual a user_id
+
+//En el servicio de follow, creamos el metodo getFollowing y devolverá un observable de tipo any, y recibirá como parametro un token, un userId por defecto nulo y una pagina que por defecto será 1
+
+//creamos una variable cabecera y le pasamos las cabeceras que hemos utilizado en metodos anteriores
+
+//Creamos una variable url que contendrá la propiedad url + 'following'
+
+//Luego comprobamos si userId es diferente de null y de ser así, decimos que url es igual a la propiedad url + 'following/' + userId + '/' + page
+
+//hacemos una petición ajax al objeto http con get y le pasamos la variable url y como segundo parametros los headers
+
+//En el api en el controlador de usuarios copiamos el metodo folloUserIds y lo pegamos en el controlador de follow
+
+//Este metodo lo llamamos en el metodo getFollowingUser en el callback de respuesta de la query, antes de retornar los resultados llamamos a followUserIds y le pasamos como paremtro req.user.sub, llamamos a la función then que nos devuelve un callback de value, dentro le pasamos los resultados, con esto podremos tener un array con los usuarios que seguimos y los que nos siguen , decir, aumentamos en el return users_following: value.following y users_follow_me: value.followed
+
+//La plantilla html podemos havcerl basandonos también en la de user
+
+//Cambiamos en el *ngFor por let follow of following
+
+//Luego debemos reemplazar las veces necesarias donde se llame al objeto user por follow.followed 
+
+//En el div contenedor ponemos un *ngIf para saber si existe following
+
+//En los botones de paginación, cambiamos la dirección del routerLink por: ['/siguiendo', userPageId, prev_page] para Anterior y para siguiente ['/siguiendo', userPageId, next_page] 
+
+//En el html de profile, buscamos el link de siguiendo del usuario y en el ancla le pasamos un rputerLink a ['/siguiendo', user_id, 1]
+
+//Importamos el componente en el app.routing y agregamos una ruta para el componente llamada 'siguiendo/:id/:page'
+
+//En el html de sidebar, en el ancla de siguiendo, agregamos un routerLink que nos lleve a ['/siguiendo', identity._id, 1], aquí le pasamos como segundo parametro el id y como tercero la página
+
+
+---------/*De quien son los seguimientos*/---------
+
+//Para poder mostrar en el titulo del componente de que usuario son los seguimientos, en el componente following crearemos un metodo llamado getUser que recibe un parametro user_id y otro page
+
+//También crearemos una propiedad user que será de tipo User
+
+//Dentro hacemos una llamada al servicio y consigo al metodo getUser, que le pasarremos el user_id, nos suscribimos yu tendremos dos funciones de callback, unade response y otra de error
+
+//Si es error podemos mostrar el error por consola
+
+//En el response comprobaremos si response.user existe, de ser así guardamos response.user en la propiedad user y hacemos una llamada al metodo getFollows recibiendo un user_id y page, sino hacemos un _router.navigate para redireccionar al home
+
+//Este metodo lo llamamos dentro del metodo actualPage, en el lugar donde se llamaba getFollows 
+
+//En el html, podemos mostrar ahora la propiedad user.name 
+
+
+---------/*Listado de seguidores*/---------
+
+//En el api, nos vamos al controlador de follow y dentro del metodo getFollowedUsers, hacemos uso de followUserIds tal como hicimos en el metodo getFollowingsUsers
+
+//En el servicio de follow creamos un metodo getFollowed y podemos copiar el codigo del metodo getFollowing
+
+//Cambiamos los parametros de url de following a followed
+
+//Creamos dentro deComponents un componente followed
+
+//Podemos copiar los metodos y propiedades de following, así mismo podemos copiar también la plantilla de following
+
+//Dentro del componente followed y ya copiado los metodos, en el metodo getFollows, cambiamos el metodo que llama al servicio de follow, en lugar de getFollowing, ponemos getFollowed 
+
+//Cambiamos las propiedades en el coponente y en la vista que se llamen following por followed, también cambiamos la ruta de la paginación de siguiendo por seguidores
+
+//Importamos el componente en el app routing y creamos una nueva ruta con path 'seguidores/:id/:page'
+
+//En la vista del sidebar y del profile, en la parte de seguidores en el ancla activamos un routerLink que nos lleve al componente de seguidores
+
+//También debemos cambiar la propiedad mencionada en las etiquetas, pues el objeto que nos devuelve la peticón http, la propiedad followed corresponde al id del usuario seguido y no de sus seguidores, por tanto se debe hacer mención a la propiedad follow.user
+
+
+---------/*Mensajería privada - Crear un modulo y componentes internos*/---------
+
+//Debemos crear un modulo de angular para mantenerlo separado de la aplicación principal y porque dicho modulo tendrá varios componentes
+
+//Dentro de app creamos una carpeta messages
+
+//Dentro creamos una carpeta Components 
+
+//Creamos dentro un componente margin
+
+//En el import principal agregamos el componente DoCheck
+
+// Definimos la plantilla
+
+//Creamos en la misma ruta un componente add 
+
+//Creamos un componente received y otro sended
+
+
+---------/*Rutas hijas e integración/---------
+
+//Creamos el fichero de modulo en la carpeta Messages, podemos crearlo desde consola con el comando "ng g m Messages"
+
+//Importamos FormsModule de '@angular/forms'
+
+//Importamos los componentes main, add, received, sended y agregamos al array de declarations
+
+//Y en exports, podemos poner los componentes en caso de querer usarlos en otro modulo
+
+//Creamos un archivo messgaes-routing.module.ts 
+
+//Importamos el NgModule y también el RouterModule y Routes de '@angular/router'
+
+//Importamos los componentes main, add, sended y received
+
+//creamos una constante de nombre messagesRoutes de tipo Routes
+
+//Agregamos en un mismo objeto json la ruta principal que será path:'mensajes' asociada al componente main y luego en una propiedad children, pasamos un array de rutas (todas estas corresponden a rutas hijas), por ejemplo "children: [
+    {path: '', redirectTo: 'recibidos', pathMatch:'full'},
+    {path: 'enviar', component: AddComponent}
+]" en la primera ruta declaramos que cuando se pase vacío nos redirija a recibidos, la siguiente, declaramos la ruta enviar que nos manda al AddComponent, luego hacemos lo mismo para los otros componentes
+
+//Llamamos al decorador NgModule, en imports ubicamos "RouterModule.forChild(messagesRoutes)" 
+
+//En exports sacamos ROuterModule, luego exportamos la clase como MessagesRoutingModule
+
+//En el messages.module importamos el modulo de routing y lo cragamos en el array de imports
+
+//En este punto, etsá hecha toda la configuración de rutas del modulo, al cargalo en el modulo principal, se cargarán todas las configuraciones de rutas, por tanto en app.module, importamos el modulo de Messages
+
+//Cargamos el modulo en el array de imports
+
+//En el main.html, agregamos la etiqueta router-outlet, que es el carga toda la configuración de nuestro modulo
+
+//En la plantilla del main, dejamos configuradas las etiquetas ancla con routerLink para cada sección nos lleve a su componente correspondiente
+
+
+---------/*Servicio de mensajes*/---------
+
+//Creamos en la carpeta Services un nuevo servicio llamado messages
+
+//Importamos HttpClient y HttpHeaders de '@ngular/common/http'
+
+//Importamos el observable, el modelo Message y el fichero GLOBAL
+
+//Declaramos una propiedad url de tipo string, dentro del constructor una propiedad privada _http de tipo HttpClient
+
+//Dentro del constructor declaramos que url será iguala GLOBAL.url
+
+//Creamos un metodo addMessage que recibe un token y un objeto message y devuelve un Observable de tipo any
+
+//creamos una variable params y le pasamos el objeto message transformado a string
+
+//Luego creamos una variable headers y le podemos pasar las headers tal como en otros metodos de servicios
+
+//Retornamos una petición ajax a _http por post y le pasamos la url+'message', los params y como tercer parametro los headers
+
+//Creamos un metodo getMyMessages, le pasamos como poarametros token y una pagina por defecto igual a 1 y este devuelve un observable tipo any
+
+//Le pasamos los headers
+
+//Retornamos _http por get y le pasamos la url+'my-messages/'+page y los headers
+
+//Tip: Las url que deben utilizarse en los servicios son las que se declaran en el api
+
+//Creamos un metodo getEmmitMessages, le pasamos como poarametros token y una pagina por defecto igual a 1 y este devuelve un observable tipo any
+
+//Le pasamos los headers
+
+//Retornamos _http por get y le pasamos la url+'messages/'+page y los headers
+
+
+---------/*Componentes para envío de mensajes*/---------
+
+//En el componente add, importamos ROuter, ActivatedRoute y Params, los modelos Message, User y Follow, los servicio de mensaje, de usuario y de follow y el fichero GLOBAL
+
+//Cargamos los servicios al array de providers
+
+//En los parametros del constructor inyectamos los servicio y las propiedades _route de tipo ActivatedRoute y _router de tipo Router
+
+//Creamos las propiedades publicas identity, token, url de tipo string, message de tipo Message, status y follows
+
+//Dentor del constructor le asignamos valores a las propiedades, title será igual a 'Enviar mensaje', , identity será igual a _userService.getIdentity(), token será igual a _userService.getToken() y la url igual a GLOBAL.url y message será igual a "new Message('','','','',identity._id, '')"
+
+
+---------/*Enviar mensajes*/---------
+
+//Maquetamos la plantilla para hacer el formulario para enviar mensajes y llamamos al evento ngSubmit, pasandole el metodo onSubmit con el formAdd como parametro
+
+//Ahora en el servicio de follows haremos un metodo que nos va a devolver los usuarios que nos siguen 
+
+//hacemos un metodo getMyFollows que devuelve un observable tipo any, como parametro le pasamos un token
+
+//Creamos una variable con las cabeceras
+
+//Hacmeos una petición ajax _http por get, le pasamos la url + 'get-my-follows/true' y como segundo parametro las cabeceras
+
+//En el componente add, creamos un metodo getMyFollows, hacemos una llamada al servicio de follow y llamamos al metodo getMyFollows al que le pasamos el token, nos suscribimos y tendremos dos funciones callback una de response y otra de error
+
+//Si da error mostramos por consola
+
+//Si llega la respuesta decimos que follows será igual a response.follows 
+
+//Llamamos el metodo en el OnInit
+
+//EN la plafilla mostramos un select con un *ngIf si existe follows, le damos un nombre y lo declaramos como ngModel, esto lo bindeamos al campo receiver del modelo Message
+
+//Dentro del select ponemos una etiueta option con un *ngFOr donde let follow of follows y como value le pasamos follow.user._id y mostramos follow.user.name + ' ' + follow.user.surname
+ + ' (' + follow.user.nick + ')'
+
+//Creamos el metodo onSubmit en el add component que recibe un parametro form
+
+//Dentro llamamos al servicio de mensaje, llamamos al metodo addMessage, le pasamos el token y nos suscribimos, tendremos dos respuestas de callback, una de response y otra de error
+
+//Si se da error ponemos status como error y mostramos el error por consola
+
+//En el response comprobamos si existe response.message y ponemos status como success y hacemos un reset al form
+
+
+---------/*Mensajes enviados*/---------
+
+//En el componente sended importamos los mismos archivo que importamos en add
+
+//Declaramos las propiedades identity, token, url de tipo string, status de tipo string y messages que será un array de tipo Message
+
+//Creamos las propiedades pages, total, page, next_page, prev_page
+
+//Copiamos las inyecciones de servicios y objetos que están como parametros del constructor de add
+
+//Dentro del constructor asignamos valores a las propiedades, donde identity será igual al metodo getIdentity() del servicio de usuario y token será igual al metodo getToken() del servicio de usuario, url ser{a igual a GLOBAL.url } 
+
+//Creamos un metodo getMessages, al que le pasamos un parametro token y pagey dentro llamamos al servicio de mensajes y llamamos al metodo getEmmitMessages y le pasamos como parametros el token y la pagina, nos suscribimos y esto nos devuelve dos callback, uno de respuesta y otro de error
+
+//En el error, mostramos por consola el error
+
+//En el response, comprobamos que existe response.messages y de ser así decimos que messages será igual a response.messages, total igual a response.total, pages igual a response.pages
+
+//Para la maquetación de la plantilla podemos utilizar la parte de listado del componente following y cambiamos el nombre de las propiedades a utilizar, para mostrar la fecha de cración lo hacemos a través de pipes y debemos imiportar al message.module el modulo MomentModule de 'ngx-moment' y añadimos al array de imports
+
+//Dentro del componente sended creamos un metodo actualPage igual que el del componente following y quitamos la llamada al metodo getUser por getMessages, pasandole el token y la page yle quitamos las variables de userId
+
+//Llamamos a actualPage en ngOnInit
+
+//En la plantilla en la parte de paginacion cambiamos las rutas por "['/mensajes/enviados', prev_page]" y "['/mensajes/enviados', next_page]"
+
+//Creamos una nuevas rutas de enviados en messages.routing igual a {path: 'enviados/:page', component: SendedComponent}
+
+
+---------/*Mensajes recibidos*/---------
+
+//Creamos una nueva ruta en messages.routing con path 'recibidos/:page' y que nos lleve al componente Received 
+
+//En el componente received podemos copiar los import, propiedades y metodos de SendedComponent
+
+//En el metodo getMessages, al llamar al metodo de servicio, llamamos al metodo getMyMessages
+
+//En el html también podemos copiar lo mismo que en sended cambiando las variables necesarias
+
+//Para que los mensajes se muestren primero los màs recientes, en el api en el controlador de mensajes, nos vamos al metodo getReceivedMessages y antes de hacer la paginación, hacemos un .sort('-created_at'), para que nos ordene de esa forma, también podemos hacerlo en getEmmitMessages
+
+
+---------/*Restringir acceso*/---------
+
+//Si nosotros escribimos las url directamente, aunque no se craguen contenidos ni los componentes, aun sin estar loggeados, significa que de alguna manera estamos accediendo a esas páginas de la aplicación
+
+//Para evitar esto tenemos que hacer uso de los guard de angular
+
+//Este archivo lo poemos generar por consola con ng g g Service/user
+
+//Seleccionamos la opcion CanActivate 
+
+//Importamos el servicio de usuario
+
+//La interfaz CanActivate es la que nos permitirá hacer el guard y comprobar si podemos acceder a la ruta o no
+
+//Toda la funcionalidad la haremos en el metodo canActivate
+
+//Importamos también Router
+
+//Dentro de parametros del constructor inyectamos las propiedades de _router y _userService
+
+//Importamos el UserService y el guard en el app.module y message.module y los cargamos en el array de providers
+
+//Importamos el guard en el app.routing y en el message.routing
+
+//Para hacer uso del guard, en las rutas, despues de llamar al componente agregamos como otro parametro canActivate:[UserGuard]
+
+
+---------/*Migrar un proyecto de Angular a la última versión*/---------
+
+//Se recomienda trabajar sobre una copia en caso de algo falle al Migrar 
+
+//Entramos a la carpeta del proyecto de angular que queremos actualizar desde consola
+
+//Para actualizar hacemos uso del comando npm install @angular/cli@latest para instalar dentro del proyecto la ultima version de angular cli 
+
+//Luego hacemos uso del comando ng update @angular/cli
+
+//Luego hacemos uso del comando ng update y nos dará una lista de las librerías que se deben actualizar y nos dará los comandos específicos para actualizar cada librería, o sino hacemos usp de ng update --all para intentar actualizar todas a la vez
+
+//Si tira algún error debemos comprobar con las versiones que solicita el terminal con las descritas en el package.json y una vez cambiadas, usamos npm update para que actualice las dependencias y podemos volver a ejecutar ng update --all, sino corre, le podemos sumar --force
+
+---------/*Error de vulnerabilites*/---------
+
+//Si al generar un proyecto de angular, este nos tira un error referente a vulnerabilites, debemos ejecutar el comando npm set audit false
+
+//Para configurar los nombre e email de git usamos los comandos git config --global user.name "Nombre" y  git config --global user.email "mail@mail.com"
+
+
+---------/*Efecto de carga*/---------
+
+//En el componente donde queramos impr¡lementar creamos una propiedad publica loading de tipo boolean
+
+//En el constructor le ponemos por defecto true
+
+//En la plantilla del componente dentro de un div preguntamos si *ngIf="loading" entonces usamos una etiqueta de imagen y le pasamos el gif de carga
+
+//De vuelta en el componente, despuès de que se realice la petición ajax de manera correcta, colocamos el loading como false
+
+
+---------/*Propiedad Input*/---------
+
+//Se explica como utilizar el input para pasar información entre componentes de un componente padre a uno hijo
+
+//Lo primero es importar el componente Input de 'angular/core', se puede adjuntar a la importación de Component y OnInit
+
+//Para hacer uso del input, debemos declarar una propiedad por ejemplo "@Input() propiedad_uno: string;" con el Input declasramos que la propiedad nos llegará desde otro componente
+
+//Para recibir estas propiedades, las debemos declarar en la etiqueta del selector html del componente entre corchetes, tal que: "[propiedad_uno]="'Valor propiedad uno'" " el valor debe ser pasado entre comillas simples porque sino angular lo reconoce como una propiedad del componente actual.
+
+//También podemos cambiar el nombre con el que se recibe la propiedad desde html, por ejemplo: "@Input('texto') propiedad_dos: string;", en el html lo enviamos como [texto]="'Propiedad dos'"
+
+//Suponinendo que tenemos un dato en otro componente que queremos pasar a nuestro componente con el input, por ejemplo tenemos la propiedad "public dato = 'dato'"
+
+//Y ya para pasarlo al otro componente lo haríamos a través del nombre de esas propiedad por el input declara, quedaría algo como: <component-recibe [texto]="dato"></component-recibe>, todo esto lo realizamos en la plantilla html del componente que envía 
+
+//Como esos datos se almacenan en el component-recibe, estos ya pueden ser mostrados, utilizados y manipulados a gusto en el html de component-recibe, por ejemplo si dato fuera un objeto con una propiedad name y este lo recibió por input en propiedad_dos, si queremos mostrar en html de ese component por el binding haríamos de la siguiente manera {{propiedad_dos.name}}
+
+
+---------/*Propiedad Output*/---------
+
+//Se explica como utilizar el output para pasar información entre componentes, de un componente hijo a uno padre
+
+//Lo primero es importar el componente Output de 'angular/core', se puede adjuntar a la importación de Component y OnInit, también importamos EventEmitter que nos permite crear un evento y enviarlo
+
+//Siguiendo el ejemplo anterior, podemos decir que en component-recibe.ts creamos una propiedad "@Output() propiedad_hijo = new EventEmitter()" se declara como EventEmitter para poder enviar las propiedades que querramos
+
+//En la plantilla de component-recibe, para este ejemplo podemos poner que en un botón llamamos a un metedod tal que: "<button (click)="enviar()"></button>"
+
+//En el ts del componente creamos el evento enviar, dentro llamamos a la propiedad_hijo y a su metodo emit y dentro le pasamos las propiedades a enviar, el código quedaría tal que: "enviar(){
+    this.propiedad_hijo.emit({nombre: "Nombre"});
+}"
+
+//En la plantilla del component-padre, en la etiqueta del component-recibe, llamamos a un evento con el nombre de la propiedad output declarada y debemos llamar a un metodo que se debe crear en el componente padre y que reciba como parametro un evento, tal que: <component-recibe (propiedad_hijo)="recibirDatos($event)"></component-recibe>, en este caso, el evento que va a recibir es el objeto que se manda por medio del metodo emit de propiedad_hijo en el metodo enviar
+
+//En el component-padre.ts agregamos el metodo recibirDatos que recibe comom parametro un dato y esto puede quedar: "recibirDatos(event){
+    console.log(event.nombre);
+}"
+
+//El event puede ser almacenado en alguna propiedad por ejemplo 
+"recibirDatos(event){
+    console.log(event.nombre);
+    this.propiedad_recibe = event
+}"
+
+//Y luego podemos mostrar eso en la plantilla html como querramos con el doble binding {{propiedad_recibe.nombre}}
+
