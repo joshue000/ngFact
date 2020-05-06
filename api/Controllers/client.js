@@ -61,7 +61,33 @@ async function nextVal(name){ //Metodo para incrementar el valor del secuencial 
 }
 
 
+function updateClient(req, res){ 
+    
+    var clientCode = req.params.code;//Solicitamos el codigo por url
+    var update = req.body;
+
+    Client.findOne({code: clientCode}, (err, client) => { //Buscamos el cliente según el código
+        
+        if(err) return res.status(500).send({message: 'Error en la petición'});
+
+        if(client && client._id){//comprobamos si existe el cliente 
+
+            Client.findByIdAndUpdate(client._id, update, {new: true}, (err, clientUpdated) => {//Buscamos el cliente por id y lo actualizamos con el objeto update
+                if(err) return res.status(500).send({message: 'Error en la petición'});
+
+                if(!clientUpdated) return res.status(404).send({message: 'No se ha podido actualizar cliente'});
+
+                return res.status(200).send({client: clientUpdated});
+            });
+
+        }
+    })
+
+}
+
+
 module.exports = {
-    saveClient
+    saveClient,
+    updateClient
 
 }
