@@ -12,7 +12,7 @@ function saveClient(req, res){
 
     var params = req.body;
     var client = new Client();
-    var name = '5eb20ce17eff8cb04f9954b2';
+    var name = '5eb20ce17eff8cb04f9954b2'; //Este id se cambia dependiendo donde esté
     var sequ;
 
     if(params.name && params.surname && params.ci_ruc_passport && params.type_of_id){
