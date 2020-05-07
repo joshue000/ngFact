@@ -85,9 +85,25 @@ function updateClient(req, res){
 
 }
 
+function deleteClient(req, res){//Método para eliminar cliente
+
+    var clientId = req.params.code;
+
+    Client.find({'code': clientId}).remove((err, clientRemoved) => {//Se busca en la bd por el code
+
+        if(err) return res.status(500).send({message: 'Error al intentar eliminar al cliente'});
+
+        if(clientRemoved) return res.status(404).send({message: 'Cliente no existe o ya fue eliminado'});
+
+        return res.status(200).send({message: 'El cliente ha sido eliminado'});
+
+    });
+}
+
 
 module.exports = {
     saveClient,
-    updateClient
+    updateClient,
+    deleteClient
 
 }
